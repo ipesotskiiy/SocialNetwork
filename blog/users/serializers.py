@@ -1,6 +1,7 @@
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from users.models import User
 
@@ -64,3 +65,14 @@ class RegisterSerializer(serializers.ModelSerializer):
 
         )
         return user
+
+
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+
+    def validate(self, attrs):
+        data = super(MyTokenObtainPairSerializer, self).validate(attrs)
+        data['token'] = data.pop('access')
+        data['refreshToken'] = data.pop('refresh')
+
+        data.update({'user': UserSerializer(self.user).data})
+        return data

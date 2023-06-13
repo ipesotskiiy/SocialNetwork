@@ -6,9 +6,10 @@ from rest_framework import generics
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 from users.models import User
-from users.serializers import RegisterSerializer, UserSerializer
+from users.serializers import RegisterSerializer, UserSerializer, MyTokenObtainPairSerializer
 
 
 class RegisterUserAPIView(generics.CreateAPIView):
@@ -37,3 +38,7 @@ class RegisterUserAPIView(generics.CreateAPIView):
         except KeyError as e:
             print(e)
             raise ValidationError({"400": f'Field {str(e)} missing'})
+
+
+class MyTokenObtainPairView(TokenObtainPairView):
+    serializer_class = MyTokenObtainPairSerializer
