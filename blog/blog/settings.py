@@ -13,6 +13,9 @@ import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
+from dotenv import load_dotenv
+
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -26,7 +29,9 @@ SECRET_KEY = 'django-insecure-8o-47g01fikp0vhmy#&ipsdx^ox+af4mlr4@dihar0*5)rx4yt
 DEBUG = True
 
 ALLOWED_HOSTS = []
+PATH_ENV_FILE = os.path.join(BASE_DIR, '.env')
 
+load_dotenv(PATH_ENV_FILE)
 
 # Application definition
 
@@ -37,6 +42,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'users',
+    'articles'
 ]
 
 MIDDLEWARE = [
@@ -84,7 +91,7 @@ DATABASES = {
     }
 }
 
-
+AUTH_USER_MODEL = 'users.User'
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
