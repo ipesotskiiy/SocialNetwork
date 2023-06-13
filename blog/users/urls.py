@@ -7,6 +7,6 @@ app_name = 'users'
 
 urlpatterns = [
     path('auth/signin', MyTokenObtainPairView.as_view(), name='signin'),
-    path('api/token/refresh/', TokenRefreshView.as_view(), имя='token_refresh'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('auth/signup', RegisterUserAPIView.as_view(), name='signup')
 ]
