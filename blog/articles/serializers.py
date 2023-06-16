@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from articles.models import Article
+from articles.models import Article, Genre
 
 
 class ArticleSerializer(serializers.ModelSerializer):
@@ -16,3 +16,14 @@ class ArticleSerializer(serializers.ModelSerializer):
     def get_id(self, obj):
         return obj.id
 
+
+class GenreSerializer(serializers.ModelSerializer):
+    genre_id = serializers.SerializerMethodField('get_id')
+
+    class Meta:
+        model = Genre
+        fields = ('name',
+                  'genre_id')
+
+    def get_id(self, obj):
+        return obj.id
