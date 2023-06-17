@@ -8,7 +8,7 @@ class Article(models.Model):
     tag_id = models.ManyToManyField('Tag')
     genre_id = models.ManyToManyField('Genre')
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
-    name = models.CharField(verbose_name='Article name', max_length=40)
+    title = models.CharField(verbose_name='Article name', max_length=40)
     text = models.TextField(verbose_name='Article text', max_length=100000)
     average_rate = models.FloatField(verbose_name='Article average rate', null=True, blank=True)
     publication_date = models.DateTimeField(verbose_name='Article publication date')

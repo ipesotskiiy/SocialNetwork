@@ -28,11 +28,15 @@ class RegisterSerializer(serializers.ModelSerializer):
     password2 = serializers.CharField(
         required=True, write_only=True
     )
+    login = serializers.CharField(
+        required=True, validators=[UniqueValidator(queryset=User.objects.all())]
+    )
 
     class Meta:
         model = User
         fields = (
             'email',
+            'login',
             'password',
             'password2'
         )
@@ -49,6 +53,13 @@ class RegisterSerializer(serializers.ModelSerializer):
                 }
             )
 
+        if not UniqueValidator(attrs['login']):
+            raise serializers.ValidationError(
+                {
+                    'login': 'This login is already taken'
+                }
+            )
+
         if attrs['password'] != attrs['password2']:
             raise serializers.ValidationError(
                 {
@@ -61,8 +72,8 @@ class RegisterSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = User.objects.create_user(
             email=validated_data['email'],
-            password=validated_data['password']
-
+            password=validated_data['password'],
+            login=validated_data['login']
         )
         return user
 
