@@ -2,7 +2,7 @@ from datetime import datetime
 
 from rest_framework import serializers
 
-from articles.models import Article, Genre
+from articles.models import Article, Genre, Comment
 
 
 class ReadArticleSerializer(serializers.ModelSerializer):
@@ -40,8 +40,6 @@ class WriteAndUpdateArticleSerializer(serializers.ModelSerializer):
         return obj.id
 
 
-
-
 class GenreSerializer(serializers.ModelSerializer):
     genre_id = serializers.SerializerMethodField('get_id')
 
@@ -52,3 +50,18 @@ class GenreSerializer(serializers.ModelSerializer):
 
     def get_id(self, obj):
         return obj.id
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    date = serializers.DateTimeField(required=False, default=datetime.now(), format="%Y-%m-%d %H:%M:%S")
+    user_login = serializers.ReadOnlyField(source='user.login')
+
+    class Meta:
+        model = Comment
+        fields = (
+            'date',
+            'text',
+            'user_id',
+            'user_login',
+            'article_id'
+        )

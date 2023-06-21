@@ -7,7 +7,9 @@ from articles.models import Article, Genre
 from articles.serializers import (
     ReadArticleSerializer,
     GenreSerializer,
-    WriteAndUpdateArticleSerializer)
+    WriteAndUpdateArticleSerializer,
+    CommentSerializer
+)
 
 
 class OneArticleView(generics.RetrieveAPIView):
@@ -56,6 +58,18 @@ class DeleteArticleView(APIView):
         article = Article.objects.get(pk=id)
         article.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class CreateCommentView(generics.CreateAPIView):
+    serializer_class = CommentSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            comment = serializer.save(user_id=self.request.user)
+            return Response({
+                'comment': CommentSerializer(comment).data
+            })
 
 
 class OneGenreView(generics.RetrieveAPIView):

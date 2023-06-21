@@ -7,7 +7,8 @@ from articles.views import (
     AllGenresView,
     CreateArticleView,
     UpdateArticleView,
-    DeleteArticleView
+    DeleteArticleView,
+    CreateCommentView
 )
 
 app_name = 'articles'
@@ -16,6 +17,7 @@ urlpatterns = [
     path('genre/all', AllGenresView.as_view(), name='genres'),
     path('article/all', AllArticlesView.as_view(), name='articles'),
     path('article/add', CreateArticleView.as_view(), name='create_article'),
+    path('comment/add', CreateCommentView.as_view(), name='create_comment'),
     path('article/<id>', OneArticleView.as_view(), name='article'),
     path('article/update/<id>', UpdateArticleView.as_view(), name='update_article'),
     path('article/delete/<id>', DeleteArticleView.as_view(), name='delete_article'),
