@@ -4,7 +4,7 @@ from articles.models import Article, Comment, Genre, Tag
 
 @admin.register(Article)
 class ArticleAdmin(admin.ModelAdmin):
-    list_display = ('name', 'average_rate', 'publication_date', 'count_like', 'count_dislike')
+    list_display = ('title', 'average_rate', 'publication_date', 'count_like', 'count_dislike')
 
 
 @admin.register(Comment)
