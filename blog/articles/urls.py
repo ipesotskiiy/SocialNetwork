@@ -9,7 +9,9 @@ from articles.views import (
     UpdateArticleView,
     DeleteArticleView,
     CreateCommentView,
-    ReadCommentView, ReadAllCommentsView
+    ReadCommentView,
+    ReadAllCommentsView,
+    UpdateCommentView, DeleteCommentView
 )
 
 app_name = 'articles'
@@ -23,6 +25,8 @@ urlpatterns = [
     path('comment/<id>', ReadCommentView.as_view(), name='comment'),
     path('article/<id>', OneArticleView.as_view(), name='article'),
     path('article/update/<id>', UpdateArticleView.as_view(), name='update_article'),
+    path('comment/update/<id>', UpdateCommentView.as_view(), name='update_comment'),
     path('article/delete/<id>', DeleteArticleView.as_view(), name='delete_article'),
+    path('comment/delete/<id>', DeleteCommentView.as_view(), name='delete_comment'),
     path('genre/<id>', OneGenreView.as_view(), name='genre')
 ]

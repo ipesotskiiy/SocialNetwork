@@ -91,6 +91,24 @@ class ReadAllCommentsView(generics.ListAPIView):
         })
 
 
+class UpdateCommentView(APIView):
+    def patch(self, request, id, *args, **kwargs):
+        comment = Comment.objects.get(pk=self.kwargs['id'])
+        serializer = WriteCommentSerializer(comment, data=request.data, partial=True)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response({
+                'comment': WriteCommentSerializer(comment).data
+            })
+
+
+class DeleteCommentView(APIView):
+    def delete(self, request, id, *args, **kwargs):
+        comment = Comment.objects.get(pk=id)
+        comment.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
 class OneGenreView(generics.RetrieveAPIView):
     def get(self, request, id):
         genre = Genre.objects.get(pk=self.kwargs['id'])
