@@ -1,9 +1,13 @@
 from django.shortcuts import render
-from rest_framework import generics
+from rest_framework import generics, status
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from articles.models import Article, Genre
-from articles.serializers import ReadArticleSerializer, GenreSerializer, WriteArticleSerializer
+from articles.serializers import (
+    ReadArticleSerializer,
+    GenreSerializer,
+    WriteAndUpdateArticleSerializer)
 
 
 class OneArticleView(generics.RetrieveAPIView):
@@ -26,16 +30,34 @@ class AllArticlesView(generics.ListAPIView):
 
 
 class CreateArticleView(generics.CreateAPIView):
-    serializer_class = WriteArticleSerializer
+    serializer_class = WriteAndUpdateArticleSerializer
 
     def post(self, request, *args, **kwargs):
-        login = request.user.login
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             article = serializer.save(user_id=self.request.user)
             return Response({
-                'article': WriteArticleSerializer(article).data
+                'article': WriteAndUpdateArticleSerializer(article).data
             })
+
+
+class UpdateArticleView(APIView):
+    def patch(self, request, id, *args, **kwargs):
+        article = Article.objects.get(pk=id)
+        serializer = WriteAndUpdateArticleSerializer(article, data=request.data, partial=True)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response({
+                'article': WriteAndUpdateArticleSerializer(article).data
+            })
+
+
+class DeleteArticleView(APIView):
+    def delete(self, request, id, *args, **kwargs):
+        article = Article.objects.get(pk=id)
+        article.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 
 class OneGenreView(generics.RetrieveAPIView):

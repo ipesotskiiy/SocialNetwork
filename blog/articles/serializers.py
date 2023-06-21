@@ -19,7 +19,7 @@ class ReadArticleSerializer(serializers.ModelSerializer):
         return obj.id
 
 
-class WriteArticleSerializer(serializers.ModelSerializer):
+class WriteAndUpdateArticleSerializer(serializers.ModelSerializer):
     article_id = serializers.SerializerMethodField('get_id')
     login = serializers.ReadOnlyField(source='user.login')
     publication_date = serializers.DateTimeField(default=datetime.now())
@@ -38,6 +38,8 @@ class WriteArticleSerializer(serializers.ModelSerializer):
 
     def get_id(self, obj):
         return obj.id
+
+
 
 
 class GenreSerializer(serializers.ModelSerializer):
