@@ -3,11 +3,14 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from articles.models import Article, Genre
+from articles.models import Article, Genre, Comment
 from articles.serializers import (
     ReadArticleSerializer,
     GenreSerializer,
-    WriteAndUpdateArticleSerializer)
+    WriteAndUpdateArticleSerializer,
+    WriteCommentSerializer,
+    ReadCommentSerializer
+)
 
 
 class OneArticleView(generics.RetrieveAPIView):
@@ -55,6 +58,54 @@ class DeleteArticleView(APIView):
     def delete(self, request, id, *args, **kwargs):
         article = Article.objects.get(pk=id)
         article.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class CreateCommentView(generics.CreateAPIView):
+    serializer_class = WriteCommentSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            comment = serializer.save(user_id=self.request.user)
+            return Response({
+                'comment': WriteCommentSerializer(comment).data
+            })
+
+
+class ReadCommentView(generics.RetrieveAPIView):
+    def get(self, request, id):
+        comment = Comment.objects.get(pk=self.kwargs['id'])
+        comment_serializer = ReadCommentSerializer(comment)
+        return Response({
+            'Comment': comment_serializer.data
+        })
+
+
+class ReadAllCommentsView(generics.ListAPIView):
+    def get(self, request):
+        comments = Comment.objects.all()
+        comments_serializer = ReadCommentSerializer(comments, many=True)
+        return Response({
+            'Comments': comments_serializer.data
+        })
+
+
+class UpdateCommentView(APIView):
+    def patch(self, request, id, *args, **kwargs):
+        comment = Comment.objects.get(pk=self.kwargs['id'])
+        serializer = WriteCommentSerializer(comment, data=request.data, partial=True)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response({
+                'comment': WriteCommentSerializer(comment).data
+            })
+
+
+class DeleteCommentView(APIView):
+    def delete(self, request, id, *args, **kwargs):
+        comment = Comment.objects.get(pk=id)
+        comment.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 

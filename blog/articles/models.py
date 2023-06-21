@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.db import models
 
 # Create your models here.
@@ -27,9 +29,9 @@ class Comment(models.Model):
     article_id = models.ForeignKey(Article, on_delete=models.CASCADE)
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     text = models.TextField(verbose_name='Comment text', max_length=200)
-    date = models.DateTimeField()
-    count_like = models.PositiveIntegerField()
-    count_dislike = models.PositiveIntegerField()
+    date = models.DateTimeField(verbose_name='Comment date', default=datetime.now())
+    count_like = models.PositiveIntegerField(default=0)
+    count_dislike = models.PositiveIntegerField(default=0)
 
     class Meta:
         verbose_name = 'Comment'
