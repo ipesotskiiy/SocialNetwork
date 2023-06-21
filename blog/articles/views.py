@@ -20,7 +20,6 @@ class OneArticleView(generics.RetrieveAPIView):
 
 
 class AllArticlesView(generics.ListAPIView):
-
     def get(self, request):
         articles = self.filter_queryset(Article.objects.all())
         articles_serializer = ReadArticleSerializer(articles, many=True)
@@ -57,7 +56,6 @@ class DeleteArticleView(APIView):
         article = Article.objects.get(pk=id)
         article.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
 
 
 class OneGenreView(generics.RetrieveAPIView):
