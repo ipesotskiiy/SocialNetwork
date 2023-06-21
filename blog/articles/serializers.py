@@ -52,7 +52,20 @@ class GenreSerializer(serializers.ModelSerializer):
         return obj.id
 
 
-class CommentSerializer(serializers.ModelSerializer):
+class ReadCommentSerializer(serializers.ModelSerializer):
+    comment_id = serializers.SerializerMethodField('get_id')
+
+    class Meta:
+        model = Comment
+        fields = (
+            '__all__'
+        )
+
+    def get_id(self, obj):
+        return obj.id
+
+
+class WriteCommentSerializer(serializers.ModelSerializer):
     date = serializers.DateTimeField(required=False, default=datetime.now(), format="%Y-%m-%d %H:%M:%S")
     user_login = serializers.ReadOnlyField(source='user.login')
 

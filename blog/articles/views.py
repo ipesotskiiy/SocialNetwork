@@ -3,12 +3,13 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from articles.models import Article, Genre
+from articles.models import Article, Genre, Comment
 from articles.serializers import (
     ReadArticleSerializer,
     GenreSerializer,
     WriteAndUpdateArticleSerializer,
-    CommentSerializer
+    WriteCommentSerializer,
+    ReadCommentSerializer
 )
 
 
@@ -61,15 +62,33 @@ class DeleteArticleView(APIView):
 
 
 class CreateCommentView(generics.CreateAPIView):
-    serializer_class = CommentSerializer
+    serializer_class = WriteCommentSerializer
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             comment = serializer.save(user_id=self.request.user)
             return Response({
-                'comment': CommentSerializer(comment).data
+                'comment': WriteCommentSerializer(comment).data
             })
+
+
+class ReadCommentView(generics.RetrieveAPIView):
+    def get(self, request, id):
+        comment = Comment.objects.get(pk=self.kwargs['id'])
+        comment_serializer = ReadCommentSerializer(comment)
+        return Response({
+            'Comment': comment_serializer.data
+        })
+
+
+class ReadAllCommentsView(generics.ListAPIView):
+    def get(self, request):
+        comments = Comment.objects.all()
+        comments_serializer = ReadCommentSerializer(comments, many=True)
+        return Response({
+            'Comments': comments_serializer.data
+        })
 
 
 class OneGenreView(generics.RetrieveAPIView):
