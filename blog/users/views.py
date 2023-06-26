@@ -1,15 +1,18 @@
 from django.db import IntegrityError
-from django.shortcuts import render
 
-# Create your views here.
-from rest_framework import generics
+from rest_framework import generics, viewsets
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from users.models import User
-from users.serializers import RegisterSerializer, UserSerializer, MyTokenObtainPairSerializer
+from users.serializers import RegisterSerializer, MyTokenObtainPairSerializer
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = RegisterSerializer
 
 
 class RegisterUserAPIView(generics.CreateAPIView):
@@ -22,7 +25,7 @@ class RegisterUserAPIView(generics.CreateAPIView):
                 user = serializer.save()
                 token = AccessToken.for_user(user)
                 refreshToken = RefreshToken.for_user(user)
-                resp = Response({"user": UserSerializer(user, context=self.get_serializer_context()).data,
+                resp = Response({"user": RegisterSerializer(user, context=self.get_serializer_context()).data,
                                  "token": str(token), "refreshToken": str(refreshToken)
                                  })
                 return resp

@@ -6,18 +6,6 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from users.models import User
 
 
-class UserSerializer(serializers.ModelSerializer):
-    email = serializers.EmailField(max_length=50)
-
-    class Meta:
-        model = User
-        fields = (
-            'id',
-            'email',
-            'login'
-        )
-
-
 class RegisterSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(
         required=True, validators=[UniqueValidator(queryset=User.objects.all())]
@@ -35,6 +23,7 @@ class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
+            'id',
             'email',
             'login',
             'password',
@@ -85,5 +74,5 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         data['token'] = data.pop('access')
         data['refreshToken'] = data.pop('refresh')
 
-        data.update({'user': UserSerializer(self.user).data})
+        data.update({'user': RegisterSerializer(self.user).data})
         return data
