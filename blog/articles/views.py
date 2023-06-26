@@ -1,112 +1,40 @@
-from django.shortcuts import render
-from rest_framework import generics, status
+from django.shortcuts import get_object_or_404
+from rest_framework import generics, viewsets
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from articles.models import Article, Genre, Comment
 from articles.serializers import (
-    ReadArticleSerializer,
     GenreSerializer,
-    WriteAndUpdateArticleSerializer,
-    WriteCommentSerializer,
-    ReadCommentSerializer
+    ArticleSerializer,
+    CommentSerializer,
 )
 
 
-class OneArticleView(generics.RetrieveAPIView):
-    def get(self, request, id):
-        article = Article.objects.get(pk=self.kwargs['id'])
-        article_serializer = ReadArticleSerializer(article)
-        return Response({
-            'article': article_serializer.data
-        })
+class ArticleViewSet(viewsets.ModelViewSet):
+    queryset = Article.objects.all()
+    serializer_class = ArticleSerializer
 
-
-class AllArticlesView(generics.ListAPIView):
-    def get(self, request):
-        articles = self.filter_queryset(Article.objects.all())
-        articles_serializer = ReadArticleSerializer(articles, many=True)
-        return Response({
-            'articles': articles_serializer.data
-        })
-
-
-class CreateArticleView(generics.CreateAPIView):
-    serializer_class = WriteAndUpdateArticleSerializer
-
-    def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
+    def create(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
         if serializer.is_valid(raise_exception=True):
-            article = serializer.save(user_id=self.request.user)
+            article = serializer.save(user_id=self.request.user.id)
             return Response({
-                'article': WriteAndUpdateArticleSerializer(article).data
+                'article': ArticleSerializer(article).data
             })
 
 
-class UpdateArticleView(APIView):
-    def patch(self, request, id, *args, **kwargs):
-        article = Article.objects.get(pk=id)
-        serializer = WriteAndUpdateArticleSerializer(article, data=request.data, partial=True)
+class CommentViewSet(viewsets.ModelViewSet):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
         if serializer.is_valid(raise_exception=True):
-            serializer.save()
+            article = get_object_or_404(Article, id=self.request.data['article_id'])
+            comment = serializer.save(user_id=self.request.user.id, article_id=article.id)
             return Response({
-                'article': WriteAndUpdateArticleSerializer(article).data
+                'comment': CommentSerializer(comment).data
             })
-
-
-class DeleteArticleView(APIView):
-    def delete(self, request, id, *args, **kwargs):
-        article = Article.objects.get(pk=id)
-        article.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class CreateCommentView(generics.CreateAPIView):
-    serializer_class = WriteCommentSerializer
-
-    def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            comment = serializer.save(user_id=self.request.user)
-            return Response({
-                'comment': WriteCommentSerializer(comment).data
-            })
-
-
-class ReadCommentView(generics.RetrieveAPIView):
-    def get(self, request, id):
-        comment = Comment.objects.get(pk=self.kwargs['id'])
-        comment_serializer = ReadCommentSerializer(comment)
-        return Response({
-            'Comment': comment_serializer.data
-        })
-
-
-class ReadAllCommentsView(generics.ListAPIView):
-    def get(self, request):
-        comments = Comment.objects.all()
-        comments_serializer = ReadCommentSerializer(comments, many=True)
-        return Response({
-            'Comments': comments_serializer.data
-        })
-
-
-class UpdateCommentView(APIView):
-    def patch(self, request, id, *args, **kwargs):
-        comment = Comment.objects.get(pk=self.kwargs['id'])
-        serializer = WriteCommentSerializer(comment, data=request.data, partial=True)
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
-            return Response({
-                'comment': WriteCommentSerializer(comment).data
-            })
-
-
-class DeleteCommentView(APIView):
-    def delete(self, request, id, *args, **kwargs):
-        comment = Comment.objects.get(pk=id)
-        comment.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class OneGenreView(generics.RetrieveAPIView):

@@ -1,32 +1,25 @@
 from django.urls import path
 
 from articles.views import (
-    AllArticlesView,
-    OneArticleView,
     OneGenreView,
     AllGenresView,
-    CreateArticleView,
-    UpdateArticleView,
-    DeleteArticleView,
-    CreateCommentView,
-    ReadCommentView,
-    ReadAllCommentsView,
-    UpdateCommentView, DeleteCommentView
+    ArticleViewSet,
+    CommentViewSet
 )
 
 app_name = 'articles'
 
 urlpatterns = [
     path('genre/all', AllGenresView.as_view(), name='genres'),
-    path('article/all', AllArticlesView.as_view(), name='articles'),
-    path('comments/all', ReadAllCommentsView.as_view(), name='comments'),
-    path('article/add', CreateArticleView.as_view(), name='create_article'),
-    path('comment/add', CreateCommentView.as_view(), name='create_comment'),
-    path('comment/<id>', ReadCommentView.as_view(), name='comment'),
-    path('article/<id>', OneArticleView.as_view(), name='article'),
-    path('article/update/<id>', UpdateArticleView.as_view(), name='update_article'),
-    path('comment/update/<id>', UpdateCommentView.as_view(), name='update_comment'),
-    path('article/delete/<id>', DeleteArticleView.as_view(), name='delete_article'),
-    path('comment/delete/<id>', DeleteCommentView.as_view(), name='delete_comment'),
+    path('article/all', ArticleViewSet.as_view({'get': 'list'}), name='articles2'),
+    path('comment/all2', CommentViewSet.as_view({'get': 'list'})),
+    path('article/add', ArticleViewSet.as_view({'post': 'create'})),
+    path('comment/add2', CommentViewSet.as_view({'post': 'create'})),
+    path('comment2/<pk>', CommentViewSet.as_view({'get': 'retrieve'})),
+    path('article/<id>', ArticleViewSet.as_view({'get': 'retrieve'}), name='article2'),
+    path('article/update/<pk>', ArticleViewSet.as_view({'patch': 'partial_update'})),
+    path('comment/update2/<pk>', CommentViewSet.as_view({'patch': 'partial_update'})),
+    path('article/delete/<pk>', ArticleViewSet.as_view({'delete': 'destroy'})),
+    path('comment/delete/<pk>', CommentViewSet.as_view({'delete': 'destroy'})),
     path('genre/<id>', OneGenreView.as_view(), name='genre')
 ]
