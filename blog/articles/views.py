@@ -2,11 +2,12 @@ from django.shortcuts import get_object_or_404
 from rest_framework import generics, viewsets
 from rest_framework.response import Response
 
-from articles.models import Article, Genre, Comment
+from articles.models import Article, Genre, Comment, Rating
 from articles.serializers import (
     GenreSerializer,
     ArticleSerializer,
     CommentSerializer,
+    RatingSerializer
 )
 
 
@@ -17,7 +18,7 @@ class ArticleViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid(raise_exception=True):
-            article = serializer.save(user_id=self.request.user.id)
+            article = serializer.save(user_id=self.request.user)
             return Response({
                 'article': ArticleSerializer(article).data
             })
@@ -31,10 +32,25 @@ class CommentViewSet(viewsets.ModelViewSet):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid(raise_exception=True):
             article = get_object_or_404(Article, id=self.request.data['article_id'])
-            comment = serializer.save(user_id=self.request.user.id, article_id=article.id)
+            comment = serializer.save(user_id=self.request.user, article_id=article)
             return Response({
                 'comment': CommentSerializer(comment).data
             })
+
+
+class RatingViewSet(viewsets.ModelViewSet):
+    queryset = Rating.objects.all()
+    serializer_class = RatingSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            article = get_object_or_404(Article, id=self.request.data['article_id'])
+            rating = serializer.save(user_id=self.request.user, article_id=article)
+            return Response({
+                'rating': RatingSerializer(rating).data
+            })
+
 
 
 class OneGenreView(generics.RetrieveAPIView):

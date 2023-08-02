@@ -1,8 +1,8 @@
 from datetime import datetime
 
+from django.core.validators import MaxValueValidator
 from django.db import models
 
-# Create your models here.
 from users.models import User
 
 
@@ -61,3 +61,16 @@ class Tag(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Rating(models.Model):
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    article_id = models.ForeignKey(Article, related_name='ratings', on_delete=models.CASCADE)
+    rating = models.PositiveSmallIntegerField(verbose_name='rating', validators=[MaxValueValidator(5)], default=0)
+
+    class Meta:
+        verbose_name = 'Rating'
+        verbose_name_plural = 'Ratings'
+
+    def __str__(self):
+        return str(self.rating)
