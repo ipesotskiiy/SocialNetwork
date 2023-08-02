@@ -2,7 +2,25 @@ from datetime import datetime
 
 from rest_framework import serializers
 
-from articles.models import Article, Genre, Comment
+from articles.models import Article, Genre, Comment, Rating
+
+
+class RatingSerializer(serializers.ModelSerializer):
+    user_id = serializers.ReadOnlyField(source='user.id')
+    rating = serializers.IntegerField()
+
+    def validate(self, attrs):
+        if attrs['rating'] > 5:
+            attrs['rating'] = 5
+        elif attrs['rating'] < 0:
+            attrs['rating'] = 0
+        return attrs
+
+    class Meta:
+        model = Rating
+        fields = (
+            '__all__'
+        )
 
 
 class ArticleSerializer(serializers.ModelSerializer):
@@ -12,6 +30,7 @@ class ArticleSerializer(serializers.ModelSerializer):
     average_rate = serializers.SerializerMethodField('calculate_average_rate', default=0.0, read_only=True)
     count_like = serializers.IntegerField(default=0, read_only=True)
     count_dislike = serializers.IntegerField(default=0, read_only=True)
+    ratings = RatingSerializer(many=True, read_only=True)
 
     class Meta:
         depth = 1
@@ -23,6 +42,21 @@ class ArticleSerializer(serializers.ModelSerializer):
     def get_id(self, obj):
         return obj.id
 
+    def calculate_average_rate(self, obj):
+        ratings = [i.get('rating') for i in RatingSerializer(obj.ratings, many=True).data]
+        len_rat = len(ratings)
+        sum_rat = sum(ratings)
+
+        if len_rat == 0 or sum_rat == 0:
+            return 0
+
+        average_rate = sum_rat / len_rat
+
+        if average_rate > 5:
+            average_rate = 5
+        round_average_rate = round(average_rate, 1)
+        return round_average_rate
+
 
 class GenreSerializer(serializers.ModelSerializer):
     genre_id = serializers.SerializerMethodField('get_id')
@@ -31,9 +65,6 @@ class GenreSerializer(serializers.ModelSerializer):
         model = Genre
         fields = ('name',
                   'genre_id')
-
-    def get_id(self, obj):
-        return obj.id
 
 
 class CommentSerializer(serializers.ModelSerializer):
