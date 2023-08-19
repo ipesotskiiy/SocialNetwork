@@ -6,7 +6,7 @@ from articles.views import (
     ArticleViewSet,
     CommentViewSet,
     RatingViewSet,
-    LikeListCreate
+    LikeListCreate, DislikeListCreate
 )
 
 app_name = 'articles'
@@ -29,5 +29,6 @@ urlpatterns = [
     path('comment/delete/<pk>', CommentViewSet.as_view({'delete': 'destroy'})),
     path('rating/delete/<pk>', RatingViewSet.as_view({'delete': 'destroy'})),
     path('genre/<id>', OneGenreView.as_view(), name='genre'),
-    path('comment/<int:pk>/like', LikeListCreate.as_view(), name='post_likes'),
+    path('comment/like/<int:pk>', LikeListCreate.as_view(), name='comment_likes'),
+    path('comment/dislike/<int:pk>', DislikeListCreate.as_view(), name='comment_dislikes'),
 ]

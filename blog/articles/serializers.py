@@ -2,7 +2,7 @@ from datetime import datetime
 
 from rest_framework import serializers
 
-from articles.models import Article, Genre, Comment, Rating, Like
+from articles.models import Article, Genre, Comment, Rating, Like, Dislike
 from users.models import User
 
 
@@ -95,10 +95,12 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class LikeSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Like
         fields = '__all__'
 
 
-
+class DislikeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Dislike
+        fields = '__all__'

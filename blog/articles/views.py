@@ -4,13 +4,13 @@ from rest_framework import generics, viewsets, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from articles.models import Article, Genre, Comment, Rating, Like
+from articles.models import Article, Genre, Comment, Rating, Like, Dislike
 from articles.serializers import (
     GenreSerializer,
     ArticleSerializer,
     CommentSerializer,
     RatingSerializer,
-    LikeSerializer
+    LikeSerializer, DislikeSerializer
 )
 
 
@@ -76,6 +76,30 @@ class LikeListCreate(APIView):
         new_like.save()
         new_like.user_id.set([request.user])
         serializer = LikeSerializer(new_like)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class DislikeListCreate(APIView):
+
+    def get(self, request, pk):
+        comment = Comment.objects.filter(pk=pk)
+        dislike_count = comment.comment_id.count()
+        serializer = DislikeSerializer(dislike_count, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, pk):
+        user_id = self.request.user
+        comment_id = Comment.objects.filter(pk=pk)
+        check = Dislike.objects.filter(Q(user_id=user_id) & Q(comment_id=comment_id.last()))
+        if (check.exists()):
+            return Response({
+                "status": status.HTTP_400_BAD_REQUEST,
+                "message": "Already Disliked"
+            })
+        new_like = Dislike.objects.create(comment_id=comment_id.last())
+        new_like.save()
+        new_like.user_id.set([request.user])
+        serializer = DislikeSerializer(new_like)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 

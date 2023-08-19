@@ -78,7 +78,5 @@ class Like(models.Model):
 
 
 class Dislike(models.Model):
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
-    comment_id = models.ForeignKey(Comment, on_delete=models.CASCADE)
-    is_dislike = models.BooleanField(default=False)
-    dislike_date = models.DateTimeField(default=datetime.now())
+    user_id = models.ManyToManyField(User)
+    comment_id = models.ForeignKey(Comment, on_delete=models.CASCADE, null=True, related_name='dislike_comment')
