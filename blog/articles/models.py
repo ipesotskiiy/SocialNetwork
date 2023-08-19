@@ -14,8 +14,6 @@ class Article(models.Model):
     text = models.TextField(verbose_name='Article text', max_length=100000)
     average_rate = models.FloatField(verbose_name='Article average rate', null=True, blank=True, default=0.0)
     publication_date = models.DateTimeField(verbose_name='Article publication date', default=datetime.now())
-    count_like = models.PositiveIntegerField(verbose_name="Article count like", default=0)
-    count_dislike = models.PositiveIntegerField(verbose_name='Article count dislike', default=0)
 
     class Meta:
         verbose_name = 'Article'
@@ -26,12 +24,10 @@ class Article(models.Model):
 
 
 class Comment(models.Model):
-    article_id = models.ForeignKey(Article, on_delete=models.CASCADE)
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    article_id = models.ForeignKey(Article, related_name='comment', on_delete=models.CASCADE)
+    user_id = models.ForeignKey(User, related_name='comments', on_delete=models.CASCADE)
     text = models.TextField(verbose_name='Comment text', max_length=200)
     date = models.DateTimeField(verbose_name='Comment date', default=datetime.now())
-    count_like = models.PositiveIntegerField(default=0)
-    count_dislike = models.PositiveIntegerField(default=0)
 
     class Meta:
         verbose_name = 'Comment'
@@ -74,3 +70,13 @@ class Rating(models.Model):
 
     def __str__(self):
         return str(self.rating)
+
+
+class Like(models.Model):
+    user_id = models.ManyToManyField(User)
+    comment_id = models.ForeignKey(Comment, on_delete=models.CASCADE, null=True, related_name='like_comment')
+
+
+class Dislike(models.Model):
+    user_id = models.ManyToManyField(User)
+    comment_id = models.ForeignKey(Comment, on_delete=models.CASCADE, null=True, related_name='dislike_comment')
