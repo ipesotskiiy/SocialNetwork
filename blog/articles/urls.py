@@ -4,7 +4,9 @@ from articles.views import (
     OneGenreView,
     AllGenresView,
     ArticleViewSet,
-    CommentViewSet, RatingViewSet
+    CommentViewSet,
+    RatingViewSet,
+    LikeListCreate
 )
 
 app_name = 'articles'
@@ -26,5 +28,6 @@ urlpatterns = [
     path('article/delete/<pk>', ArticleViewSet.as_view({'delete': 'destroy'})),
     path('comment/delete/<pk>', CommentViewSet.as_view({'delete': 'destroy'})),
     path('rating/delete/<pk>', RatingViewSet.as_view({'delete': 'destroy'})),
-    path('genre/<id>', OneGenreView.as_view(), name='genre')
+    path('genre/<id>', OneGenreView.as_view(), name='genre'),
+    path('comment/<int:pk>/like', LikeListCreate.as_view(), name='post_likes'),
 ]

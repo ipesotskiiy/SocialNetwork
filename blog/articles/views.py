@@ -1,13 +1,16 @@
+from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404
-from rest_framework import generics, viewsets
+from rest_framework import generics, viewsets, permissions, status
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
-from articles.models import Article, Genre, Comment, Rating
+from articles.models import Article, Genre, Comment, Rating, Like
 from articles.serializers import (
     GenreSerializer,
     ArticleSerializer,
     CommentSerializer,
-    RatingSerializer
+    RatingSerializer,
+    LikeSerializer
 )
 
 
@@ -51,6 +54,29 @@ class RatingViewSet(viewsets.ModelViewSet):
                 'rating': RatingSerializer(rating).data
             })
 
+
+class LikeListCreate(APIView):
+
+    def get(self, request, pk):
+        comment = Comment.objects.filter(pk=pk)
+        like_count = comment.comment_id.count()
+        serializer = LikeSerializer(like_count, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, pk):
+        user_id = self.request.user
+        comment_id = Comment.objects.filter(pk=pk)
+        check = Like.objects.filter(Q(user_id=user_id) & Q(comment_id=comment_id.last()))
+        if (check.exists()):
+            return Response({
+                "status": status.HTTP_400_BAD_REQUEST,
+                "message": "Already Liked"
+            })
+        new_like = Like.objects.create(comment_id=comment_id.last())
+        new_like.save()
+        new_like.user_id.set([request.user])
+        serializer = LikeSerializer(new_like)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class OneGenreView(generics.RetrieveAPIView):

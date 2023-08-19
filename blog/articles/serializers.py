@@ -2,7 +2,8 @@ from datetime import datetime
 
 from rest_framework import serializers
 
-from articles.models import Article, Genre, Comment, Rating
+from articles.models import Article, Genre, Comment, Rating, Like
+from users.models import User
 
 
 class RatingSerializer(serializers.ModelSerializer):
@@ -72,11 +73,32 @@ class CommentSerializer(serializers.ModelSerializer):
     date = serializers.DateTimeField(required=False, default=datetime.now(), format="%Y-%m-%d %H:%M:%S", read_only=True)
     user_login = serializers.ReadOnlyField(source='user.login')
     article_id = serializers.ReadOnlyField(source='article.id')
+    liked_by = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=User.objects.all()
+    )
 
     class Meta:
         depth = 1
         model = Comment
         fields = '__all__'
 
+    def update(self, instance, validated_data):
+        liked_by = validated_data.pop('liked_by')
+        for i in liked_by:
+            instance.liked_by.add(i)
+        instance.save()
+        return instance
+
     def get_id(self, obj):
         return obj.id
+
+
+class LikeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Like
+        fields = '__all__'
+
+
+
