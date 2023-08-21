@@ -7,10 +7,16 @@ from users.models import User
 
 
 class RatingSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор рейтинга
+    """
     user_id = serializers.ReadOnlyField(source='user.id')
     rating = serializers.IntegerField()
 
     def validate(self, attrs):
+        """
+        Валидация которая нужна для того, что бы рейтинг был не выше 5 и не ниже 0
+        """
         if attrs['rating'] > 5:
             attrs['rating'] = 5
         elif attrs['rating'] < 0:
@@ -25,12 +31,13 @@ class RatingSerializer(serializers.ModelSerializer):
 
 
 class ArticleSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор статей
+    """
     article_id = serializers.SerializerMethodField('get_id')
     login = serializers.ReadOnlyField(source='user.login')
     publication_date = serializers.DateTimeField(default=datetime.now(), read_only=True)
     average_rate = serializers.SerializerMethodField('calculate_average_rate', default=0.0, read_only=True)
-    count_like = serializers.IntegerField(default=0, read_only=True)
-    count_dislike = serializers.IntegerField(default=0, read_only=True)
     ratings = RatingSerializer(many=True, read_only=True)
 
     class Meta:
@@ -44,6 +51,9 @@ class ArticleSerializer(serializers.ModelSerializer):
         return obj.id
 
     def calculate_average_rate(self, obj):
+        """
+        Функция для высчитывания среднего рейтинга статьи
+        """
         ratings = [i.get('rating') for i in RatingSerializer(obj.ratings, many=True).data]
         len_rat = len(ratings)
         sum_rat = sum(ratings)
@@ -60,47 +70,46 @@ class ArticleSerializer(serializers.ModelSerializer):
 
 
 class GenreSerializer(serializers.ModelSerializer):
-    genre_id = serializers.SerializerMethodField('get_id')
+    """
+    Сериализатор жанров
+    """
 
     class Meta:
         model = Genre
-        fields = ('name',
-                  'genre_id')
+        fields = '__all__'
 
 
 class CommentSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор комментариев
+    """
     comment_id = serializers.SerializerMethodField('get_id')
     date = serializers.DateTimeField(required=False, default=datetime.now(), format="%Y-%m-%d %H:%M:%S", read_only=True)
     user_login = serializers.ReadOnlyField(source='user.login')
     article_id = serializers.ReadOnlyField(source='article.id')
-    liked_by = serializers.PrimaryKeyRelatedField(
-        many=True,
-        queryset=User.objects.all()
-    )
 
     class Meta:
         depth = 1
         model = Comment
         fields = '__all__'
 
-    def update(self, instance, validated_data):
-        liked_by = validated_data.pop('liked_by')
-        for i in liked_by:
-            instance.liked_by.add(i)
-        instance.save()
-        return instance
-
     def get_id(self, obj):
         return obj.id
 
 
 class LikeSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор лайков
+    """
     class Meta:
         model = Like
         fields = '__all__'
 
 
 class DislikeSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор дизлайков
+    """
     class Meta:
         model = Dislike
         fields = '__all__'
