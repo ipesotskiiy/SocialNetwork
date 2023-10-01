@@ -15,6 +15,9 @@
 ```
 git clone https://github.com/ipesotskiiy/Django_blog/tree/master
 ```
+
+После чего необходимо установить библиотеки pip install -r requirements.txt
+
 Создать .env файл в котором будут указаны данные для бд
 
 Создать дирректорию log и файл log.log
