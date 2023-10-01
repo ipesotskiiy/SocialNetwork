@@ -19,7 +19,8 @@ git clone https://github.com/ipesotskiiy/Django_blog/tree/master
 
 Создать дирректорию log и файл log.log
 
-![image](https://github.com/ipesotskiiy/Django_Shop/assets/82309024/10247509-f2e6-41a1-8044-304960991b22)
+![image](https://github.com/ipesotskiiy/Django_blog/assets/82309024/7cacfa9f-1c9f-4cd7-9946-5ba1b20c1a4a)
+
 
 Сделать миграции ```python manage.py migrate```
 
