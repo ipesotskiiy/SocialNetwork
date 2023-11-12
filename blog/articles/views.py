@@ -10,7 +10,8 @@ from articles.serializers import (
     ArticleSerializer,
     CommentSerializer,
     RatingSerializer,
-    LikeSerializer, DislikeSerializer
+    LikeSerializer,
+    DislikeSerializer
 )
 
 
@@ -21,7 +22,10 @@ class ArticleViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid(raise_exception=True):
+            # genre = Genre.objects.create(name='Хоррор')
             article = serializer.save(user_id=self.request.user)
+            # genre_id = Genre.objects.get_or_create(id=20)
+
             return Response({
                 'article': ArticleSerializer(article).data
             })

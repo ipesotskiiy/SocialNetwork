@@ -11,8 +11,8 @@ class Article(models.Model):
     Модель статей
     """
 
-    tag_id = models.ManyToManyField('Tag')
-    genre_id = models.ManyToManyField('Genre')
+    tag_id = models.ManyToManyField('Tag', null=True, blank=True)
+    genres = models.ManyToManyField('Genre')
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(verbose_name='Article name', max_length=40)
     text = models.TextField(verbose_name='Article text', max_length=100000)
@@ -24,7 +24,7 @@ class Article(models.Model):
         verbose_name_plural = 'Articles'
 
     def __str__(self):
-        return self.name
+        return self.title
 
 
 class Comment(models.Model):
@@ -50,8 +50,14 @@ class Genre(models.Model):
     Модель жанров
     """
 
-    name = models.CharField("Genre name", max_length=30)
-    description = models.TextField("Genre description")
+    GENRES = (
+        ('Хоррор', 'Хоррор'),
+        ('Фентези', 'Фентези'),
+        ('Научная фанктастика', 'Научная фанктастика'),
+        ('Для детей', 'Для детей'),
+    )
+
+    name = models.CharField("Genre name", max_length=100, choices=GENRES)
 
     class Meta:
         verbose_name = 'Genre'
