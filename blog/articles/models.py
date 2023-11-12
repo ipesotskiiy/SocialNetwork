@@ -7,8 +7,12 @@ from users.models import User
 
 
 class Article(models.Model):
-    tag_id = models.ManyToManyField('Tag')
-    genre_id = models.ManyToManyField('Genre')
+    """
+    Модель статей
+    """
+
+    tag_id = models.ManyToManyField('Tag', null=True, blank=True)
+    genres = models.ManyToManyField('Genre')
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(verbose_name='Article name', max_length=40)
     text = models.TextField(verbose_name='Article text', max_length=100000)
@@ -20,10 +24,14 @@ class Article(models.Model):
         verbose_name_plural = 'Articles'
 
     def __str__(self):
-        return self.name
+        return self.title
 
 
 class Comment(models.Model):
+    """
+    Модель комментариев
+    """
+
     article_id = models.ForeignKey(Article, related_name='comment', on_delete=models.CASCADE)
     user_id = models.ForeignKey(User, related_name='comments', on_delete=models.CASCADE)
     text = models.TextField(verbose_name='Comment text', max_length=200)
@@ -38,7 +46,18 @@ class Comment(models.Model):
 
 
 class Genre(models.Model):
-    name = models.CharField()
+    """
+    Модель жанров
+    """
+
+    GENRES = (
+        ('Хоррор', 'Хоррор'),
+        ('Фентези', 'Фентези'),
+        ('Научная фанктастика', 'Научная фанктастика'),
+        ('Для детей', 'Для детей'),
+    )
+
+    name = models.CharField("Genre name", max_length=100, choices=GENRES)
 
     class Meta:
         verbose_name = 'Genre'
@@ -49,6 +68,10 @@ class Genre(models.Model):
 
 
 class Tag(models.Model):
+    """
+    Модель тэгов
+    """
+
     name = models.CharField(max_length=20)
 
     class Meta:
@@ -60,6 +83,10 @@ class Tag(models.Model):
 
 
 class Rating(models.Model):
+    """
+    Модель рейтинга статей
+    """
+
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     article_id = models.ForeignKey(Article, related_name='ratings', on_delete=models.CASCADE)
     rating = models.PositiveSmallIntegerField(verbose_name='rating', validators=[MaxValueValidator(5)], default=0)
@@ -73,10 +100,17 @@ class Rating(models.Model):
 
 
 class Like(models.Model):
+    """
+    Модель лайков коммнтариеев
+    """
+
     user_id = models.ManyToManyField(User)
     comment_id = models.ForeignKey(Comment, on_delete=models.CASCADE, null=True, related_name='like_comment')
 
 
 class Dislike(models.Model):
+    """
+    Модель дизлайка комментариев
+    """
     user_id = models.ManyToManyField(User)
     comment_id = models.ForeignKey(Comment, on_delete=models.CASCADE, null=True, related_name='dislike_comment')
