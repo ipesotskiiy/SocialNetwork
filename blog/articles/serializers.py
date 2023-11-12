@@ -83,27 +83,15 @@ class ArticleSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         title = validated_data.get('title')
         text = validated_data.get('text')
-        genre_names = validated_data.get('genres', [])  # Получаем выбранные жанры в виде списка имен
+        genre_names = validated_data.get('genres', [])
 
         article = Article.objects.create(title=title, text=text, user_id=validated_data['user_id'])
 
         for genre_name in genre_names:
-            genre, _ = Genre.objects.get_or_create(name=genre_name)  # Получаем или создаем жанр
-            article.genres.add(genre)  # Связываем жанр со статьей
+            genre, _ = Genre.objects.get_or_create(name=genre_name)
+            article.genres.add(genre)
 
         return article
-        # author_data = validated_data.pop('genre_id')
-        # genre_serializer = GenreSerializer(data=author_data)
-        # genre = genre_serializer.save()
-
-        # if genre_serializer.is_valid():
-        #
-        # else:
-        #     raise serializers.ValidationError('Error creating author')
-        # genre = Genre.objects.create(name=author_data.get('name'))
-
-        # book = Article.objects.create(genre_id=genre, **validated_data)
-        # return book
 
 
 class CommentSerializer(serializers.ModelSerializer):

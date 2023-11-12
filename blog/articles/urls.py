@@ -6,7 +6,8 @@ from articles.views import (
     ArticleViewSet,
     CommentViewSet,
     RatingViewSet,
-    LikeListCreate, DislikeListCreate
+    LikeListCreate,
+    DislikeListCreate
 )
 
 app_name = 'articles'
