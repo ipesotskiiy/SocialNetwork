@@ -11,10 +11,10 @@ class Article(models.Model):
     Модель статей
     """
 
-    tag_id = models.ManyToManyField('Tag', null=True, blank=True)
+    tags = models.ManyToManyField('Tag', related_name='tags')
     genres = models.ManyToManyField('Genre')
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
-    title = models.CharField(verbose_name='Article name', max_length=40)
+    title = models.SlugField(verbose_name='Article name', max_length=40)
     text = models.TextField(verbose_name='Article text', max_length=100000)
     average_rate = models.FloatField(verbose_name='Article average rate', null=True, blank=True, default=0.0)
     publication_date = models.DateTimeField(verbose_name='Article publication date', default=datetime.now())
@@ -69,10 +69,10 @@ class Genre(models.Model):
 
 class Tag(models.Model):
     """
-    Модель тэгов
+    Модель тегов
     """
 
-    name = models.CharField(max_length=20)
+    name = models.CharField(max_length=60, unique=True)
 
     class Meta:
         verbose_name = 'Tag'
