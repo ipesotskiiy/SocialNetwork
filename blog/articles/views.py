@@ -4,14 +4,14 @@ from rest_framework import generics, viewsets, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from articles.models import Article, Genre, Comment, Rating, Like, Dislike
+from articles.models import Article, Genre, Comment, Rating, Like, Dislike, Tag
 from articles.serializers import (
     GenreSerializer,
     ArticleSerializer,
     CommentSerializer,
     RatingSerializer,
     LikeSerializer,
-    DislikeSerializer
+    DislikeSerializer, TagSerializer
 )
 
 
@@ -55,6 +55,11 @@ class RatingViewSet(viewsets.ModelViewSet):
             return Response({
                 'rating': RatingSerializer(rating).data
             })
+
+
+class TagViewSet(viewsets.ModelViewSet):
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
 
 
 class LikeListCreate(APIView):

@@ -2,7 +2,7 @@ from datetime import datetime
 
 from rest_framework import serializers
 
-from articles.models import Article, Genre, Comment, Rating, Like, Dislike
+from articles.models import Article, Genre, Comment, Rating, Like, Dislike, Tag
 
 
 class RatingSerializer(serializers.ModelSerializer):
@@ -34,8 +34,6 @@ class GenreSerializer(serializers.ModelSerializer):
     Сериализатор жанров
     """
 
-    # name = serializers.ChoiceField(choices=Genre.GENRES)
-
     class Meta:
         model = Genre
         fields = (
@@ -47,20 +45,21 @@ class ArticleSerializer(serializers.ModelSerializer):
     """
     Сериализатор статей
     """
-    # article_id = serializers.SerializerMethodField('get_id')
     login = serializers.ReadOnlyField(source='user.login')
     publication_date = serializers.DateTimeField(default=datetime.now(), read_only=True)
     average_rate = serializers.SerializerMethodField('calculate_average_rate', default=0.0, read_only=True)
     ratings = RatingSerializer(many=True, read_only=True)
     genres = GenreSerializer(many=True)
+    tags = serializers.SlugRelatedField(
+        many=True,
+        queryset=Tag.objects.all(),
+        slug_field='name'
+    )
 
     class Meta:
         depth = 1
         model = Article
         fields = '__all__'
-
-    # def get_id(self, obj):
-    #     return obj.id
 
     def calculate_average_rate(self, obj):
         """
@@ -84,12 +83,18 @@ class ArticleSerializer(serializers.ModelSerializer):
         title = validated_data.get('title')
         text = validated_data.get('text')
         genre_names = validated_data.get('genres', [])
+        tag_names = validated_data.get('tags', [])
 
-        article = Article.objects.create(title=title, text=text, user_id=validated_data['user_id'])
+        article = Article.objects.create(title=title, text=text,
+                                         user_id=validated_data['user_id'])
 
         for genre_name in genre_names:
             genre, _ = Genre.objects.get_or_create(name=genre_name)
             article.genres.add(genre)
+
+        for tag_name in tag_names:
+            tag, _ = Tag.objects.get_or_create(name=tag_name)
+            article.tags.add(tag)
 
         return article
 
@@ -129,4 +134,19 @@ class DislikeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Dislike
+        fields = '__all__'
+
+
+class TagSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор тегоа
+    """
+    articles = serializers.SlugRelatedField(
+        many=True,
+        read_only=True,
+        slug_field='title'
+    )
+
+    class Meta:
+        model = Tag
         fields = '__all__'
