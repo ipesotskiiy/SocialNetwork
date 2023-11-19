@@ -3,7 +3,9 @@ from django.shortcuts import get_object_or_404
 from rest_framework import generics, viewsets, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django_filters.rest_framework import DjangoFilterBackend
 
+from articles.filters import ArticleFilter
 from articles.models import Article, Genre, Comment, Rating, Like, Dislike, Tag
 from articles.serializers import (
     GenreSerializer,
@@ -11,13 +13,16 @@ from articles.serializers import (
     CommentSerializer,
     RatingSerializer,
     LikeSerializer,
-    DislikeSerializer, TagSerializer
+    DislikeSerializer,
+    TagSerializer
 )
 
 
 class ArticleViewSet(viewsets.ModelViewSet):
     queryset = Article.objects.all()
     serializer_class = ArticleSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = ArticleFilter
 
     def create(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
@@ -120,6 +125,7 @@ class OneGenreView(generics.RetrieveAPIView):
 
 
 class AllGenresView(generics.ListAPIView):
+
     def get(self, request):
         genres = Genre.objects.all()
         genres_serializer = GenreSerializer(genres, many=True)

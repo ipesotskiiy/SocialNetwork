@@ -47,7 +47,7 @@ class ArticleSerializer(serializers.ModelSerializer):
     """
     login = serializers.ReadOnlyField(source='user.login')
     publication_date = serializers.DateTimeField(default=datetime.now(), read_only=True)
-    average_rate = serializers.SerializerMethodField('calculate_average_rate', default=0.0, read_only=True)
+    average_rate = serializers.SerializerMethodField('calculate_average_rate', read_only=True)
     ratings = RatingSerializer(many=True, read_only=True)
     genres = GenreSerializer(many=True)
     tags = serializers.SlugRelatedField(
@@ -76,8 +76,7 @@ class ArticleSerializer(serializers.ModelSerializer):
 
         if average_rate > 5:
             average_rate = 5
-        round_average_rate = round(average_rate, 1)
-        return round_average_rate
+        return round(average_rate, 1)
 
     def create(self, validated_data):
         title = validated_data.get('title')
