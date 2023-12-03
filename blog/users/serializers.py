@@ -3,7 +3,34 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from users.models import User
+from users.models import User, Follower
+
+
+class FollowingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Follower
+        fields = ('id', 'subscriber', 'created')
+
+
+class FollowersSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Follower
+        fields = ('id', 'user', 'created')
+
+
+class UserSerializer(serializers.ModelSerializer):
+    following = serializers.SerializerMethodField()
+    followers = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ('id', 'email', 'login', 'following', 'followers')
+
+    def get_following(self, obj):
+        return FollowingSerializer(obj.user.all(), many=True).data
+
+    def get_followers(self, obj):
+        return FollowersSerializer(obj.subscriber.all(), many=True).data
 
 
 class RegisterSerializer(serializers.ModelSerializer):

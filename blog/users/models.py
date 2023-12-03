@@ -9,8 +9,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(verbose_name='User email', max_length=50, db_index=True, unique=True)
     password = models.CharField(verbose_name='User password', max_length=255)
     username = None
-    login = models.CharField(verbose_name='User login', unique=True, null=True, blank=True)
-    information = models.TextField(verbose_name='Information about user', max_length=1000, null=True, blank=True)
+    login = models.CharField(verbose_name='User login', unique=True)
+    bio = models.TextField(verbose_name='Information about user', max_length=2000, null=True, blank=True)
     count_article = models.PositiveIntegerField(verbose_name='Count articles', null=True, blank=True)
     avatar = models.FileField(
         upload_to='',
@@ -19,6 +19,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         null=True,
         blank=True
     )
+    country = models.CharField(max_length=40, null=True, blank=True)
+    city = models.CharField(max_length=40, null=True, blank=True)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
@@ -34,4 +36,18 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
+
+
+class Follower(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user')
+    subscriber = models.ForeignKey(User, on_delete=models.CASCADE, related_name='subscribers')
+    created = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'subscriber'], name='unique_followers')
+        ]
+
+    def __str__(self):
+        return f'{self.subscriber } подписан на {self.user}'
 
