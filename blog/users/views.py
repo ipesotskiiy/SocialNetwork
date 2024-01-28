@@ -8,12 +8,17 @@ from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from users.models import User, Follower
-from users.serializers import RegisterSerializer, MyTokenObtainPairSerializer, UserSerializer
+from users.serializers import UserSerializer, MyTokenObtainPairSerializer, RegisterSerializer
 
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
-    serializer_class = RegisterSerializer
+    serializer_class = UserSerializer
+
+    def list(self, request, *args, **kwargs):
+        users = User.objects.all().order_by('login')
+        serializer = UserSerializer(instance=users, many=True)
+        return Response(serializer.data)
 
 
 class RegisterUserAPIView(generics.CreateAPIView):

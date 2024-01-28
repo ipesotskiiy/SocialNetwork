@@ -5,8 +5,8 @@ from users.models import User
 
 
 class Chat(models.Model):
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    companion = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='chat_starter', null=True)
+    companion = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='chat_companion', null=True)
     start_time = models.DateTimeField(auto_now=True)
 
 

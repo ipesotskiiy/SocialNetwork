@@ -40,7 +40,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 class Follower(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user')
-    subscriber = models.ForeignKey(User, on_delete=models.CASCADE, related_name='subscribers')
+    subscriber = models.ForeignKey(User, on_delete=models.CASCADE, related_name='subscriber')
     created = models.DateTimeField(auto_now_add=True, db_index=True)
 
     class Meta:

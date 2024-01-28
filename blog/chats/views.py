@@ -3,30 +3,31 @@ from django.shortcuts import render, redirect, reverse
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from chats.models import Chat
 from chats.serializers import ChatSerializer, ChatListSerializer
 from users.models import User
 
 
-@api_view(['POST'])
-def start_chat(request, ):
-    data = request.data
-    login = data.pop('login')
-    try:
-        participant = User.objects.get(login=login)
-    except User.DoesNotExist:
-        return Response({'message': 'You cannot chat with a non existent user'})
+class CreateChatView(APIView):
+    def post(self, request):
+        data = self.request.data
+        login = data.pop('login')
+        try:
+            participant = User.objects.get(login=login)
+        except User.DoesNotExist:
+            return Response({'message': 'You cannot chat with a non existent user'})
 
-    chat = Chat.objects.filter(Q(user=request.user, companion=participant)
-                               | Q(user=participant, companion=request.user))
+        chat = Chat.objects.filter(Q(user=request.user, companion=participant)
+                                   | Q(user=participant, companion=request.user))
 
-    if chat.exists():
-        return redirect(reverse('get_chat', args=(chat[0].id,)))
+        if chat.exists():
+            return redirect(reverse('get_chat', args=(chat[0].id,)))
 
-    else:
-        chat = Chat.objects.create(user=request.user, companion=participant)
-        return Response(ChatSerializer(instance=chat).data)
+        else:
+            chat = Chat.objects.create(user=request.user, companion=participant)
+            return Response(ChatSerializer(instance=chat).data)
 
 
 @api_view(['GET'])

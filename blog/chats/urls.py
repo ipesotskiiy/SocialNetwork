@@ -1,9 +1,9 @@
 from django.urls import path
 
-from chats import views
+from chats.views import get_chat, get_all_user_chats, CreateChatView
 
 urlpatterns = [
-    path('start/', views.start_chat, name='start_chat'),
-    path('<int:chat_id/', views.get_chat, name='get_chat'),
-    path('', views.get_all_user_chats, name='get_all_user_chats')
+    path('start/', CreateChatView.as_view(), name='start_chat'),
+    path('<int:chat_id/', get_chat, name='get_chat'),
+    path('', get_all_user_chats, name='get_all_user_chats')
 ]

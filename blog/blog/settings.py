@@ -29,7 +29,7 @@ SECRET_KEY = 'django-insecure-8o-47g01fikp0vhmy#&ipsdx^ox+af4mlr4@dihar0*5)rx4yt
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 PATH_ENV_FILE = os.path.join(BASE_DIR, '.env')
 
 load_dotenv(PATH_ENV_FILE)
@@ -52,7 +52,8 @@ INSTALLED_APPS = [
     'channels',
 
     'users',
-    'articles'
+    'articles',
+    'chats'
 ]
 
 MIDDLEWARE = [
@@ -63,6 +64,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'blog.urls'
@@ -124,6 +126,16 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'blog.wsgi.application'
+ASGI_APPLICATION = 'blog.asgi.application'
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [('127.0.0.1', 6379)]
+        }
+    }
+}
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
