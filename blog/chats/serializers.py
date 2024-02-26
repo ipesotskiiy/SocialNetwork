@@ -18,11 +18,20 @@ class ChatListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Chat
-        field = ('user', 'companion', 'last_message')
+        fields = ('user', 'companion', 'last_message')
 
     def get_last_message(self, instance):
         message = instance.message_set.first()
-        return MessageSerializer(instance=message)
+        if message:
+            return {
+                'id': message.id,
+                'text': message.text,
+                'sender': message.sender.id,
+                'timestamp': message.date_and_time,
+                'attachment': message.attachment
+            }
+        else:
+            return None
 
 
 class ChatSerializer(serializers.ModelSerializer):

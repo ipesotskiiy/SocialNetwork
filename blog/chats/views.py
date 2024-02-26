@@ -11,23 +11,6 @@ from chats.serializers import ChatSerializer, ChatListSerializer
 from users.models import User
 
 
-# @api_view(['POST'])
-# def start_chat(request, ):
-#     data = request.data
-#     login = data.pop('login')
-#     try:
-#         participant = User.objects.get(login=login)
-#     except User.DoesNotExist:
-#         return Response({'message': 'You cannot chat with a non existent user'})
-#
-#     conversation = Chat.objects.filter(Q(user=request.user, companion=participant) |
-#                                                Q(user=participant, companion=request.user))
-#     if conversation.exists():
-#         return redirect(reverse('get_chat', args=(conversation[0].id,)))
-#     else:
-#         conversation = Chat.objects.create(user=request.user, companion=participant)
-#         return Response(ChatSerializer(instance=conversation).data)
-
 class StartChatView(APIView):
     def post(self, request, format=None):
         # Создание и валидация сериализатора
