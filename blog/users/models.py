@@ -9,7 +9,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(verbose_name='User email', max_length=50, db_index=True, unique=True)
     password = models.CharField(verbose_name='User password', max_length=255)
     username = None
-    login = models.CharField(verbose_name='User login', unique=True)
+    login = models.CharField(verbose_name='User login', unique=True, max_length=30)
     bio = models.TextField(verbose_name='Information about user', max_length=2000, null=True, blank=True)
     count_article = models.PositiveIntegerField(verbose_name='Count articles', null=True, blank=True)
     avatar = models.FileField(

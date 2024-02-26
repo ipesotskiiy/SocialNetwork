@@ -1,0 +1,11 @@
+.env
+../.idea/
+articles/__pycache__/
+articles/migrations/
+blog/__pycache__/
+chats/__pycache__/
+chats/migrations/
+log/
+logger/__pycache__/
+users/__pycache__/
+users/migrations/
