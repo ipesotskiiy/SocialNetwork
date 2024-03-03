@@ -32,6 +32,13 @@ class UserSerializer(serializers.ModelSerializer):
     def get_followers(self, obj):
         return FollowersSerializer(obj.subscriber.all(), many=True).data
 
+class CompanionSerializer(serializers.ModelSerializer):
+    login = serializers.CharField()
+
+    class Meta:
+        model = User
+        fields = ('login',)
+
 
 class RegisterSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(

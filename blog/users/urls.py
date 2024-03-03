@@ -16,5 +16,5 @@ urlpatterns = [
     path('auth/signup', RegisterUserAPIView.as_view(), name='signup'),
     path('user/all', UserViewSet.as_view({'get': 'list'})),
     path('follower/add/<pk>', UserFollowingViewSet.as_view({'post': 'create'})),
-    path('follower/delete/<pk>', UserFollowingViewSet.as_view({'delete': 'destroy'}))
+    path('follower/delete/<pk>', UserFollowingViewSet.as_view({'delete': 'destroy'})),
 ]

@@ -62,6 +62,11 @@ class RatingViewSet(viewsets.ModelViewSet):
             })
 
 
+class GenreViewSet(viewsets.ModelViewSet):
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+
+
 class TagViewSet(viewsets.ModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
@@ -114,21 +119,23 @@ class DislikeListCreate(APIView):
         serializer = DislikeSerializer(new_like)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-
-class OneGenreView(generics.RetrieveAPIView):
-    def get(self, request, id):
-        genre = Genre.objects.get(pk=self.kwargs['id'])
-        genre_serializer = GenreSerializer(genre)
-        return Response({
-            'genre': genre_serializer.data
-        })
-
-
-class AllGenresView(generics.ListAPIView):
-
-    def get(self, request):
-        genres = Genre.objects.all()
-        genres_serializer = GenreSerializer(genres, many=True)
-        return Response({
-            'genres': genres_serializer.data
-        })
+# class OneGenreView(generics.RetrieveAPIView):
+#     serializer_class = GenreSerializer
+#
+#     def get(self, request, id):
+#         genre = Genre.objects.get(pk=self.kwargs['id'])
+#         genre_serializer = GenreSerializer(genre)
+#         return Response({
+#             'genre': genre_serializer.data
+#         })
+#
+#
+# class AllGenresView(generics.ListAPIView):
+#     serializer_class = GenreSerializer
+#
+#     def get(self, request):
+#         genres = Genre.objects.all()
+#         genres_serializer = GenreSerializer(genres, many=True)
+#         return Response({
+#             'genres': genres_serializer.data
+#         })

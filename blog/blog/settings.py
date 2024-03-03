@@ -29,7 +29,7 @@ SECRET_KEY = 'django-insecure-8o-47g01fikp0vhmy#&ipsdx^ox+af4mlr4@dihar0*5)rx4yt
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 PATH_ENV_FILE = os.path.join(BASE_DIR, '.env')
 
 load_dotenv(PATH_ENV_FILE)
@@ -37,6 +37,8 @@ load_dotenv(PATH_ENV_FILE)
 # Application definition
 
 INSTALLED_APPS = [
+    'channels',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -51,7 +53,8 @@ INSTALLED_APPS = [
     'drf_yasg',
 
     'users',
-    'articles'
+    'articles',
+    'chats'
 ]
 
 MIDDLEWARE = [
@@ -67,6 +70,7 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'blog.urls'
 
 REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': ['rest_framework.permissions.IsAuthenticated', ],
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
@@ -123,6 +127,18 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'blog.wsgi.application'
+ASGI_APPLICATION = 'blog.asgi.application'
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [('127.0.0.1', 6379)],
+        },
+        'MIDDLEWARE_CLASSES': [
+            'blog.tokenauth_middleware.TokenAuthMiddleware', ]
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
@@ -179,7 +195,6 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static_root')
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
