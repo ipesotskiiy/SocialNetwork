@@ -41,17 +41,23 @@ class ChatSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user_login = validated_data['user']['login']
-        # Получить или создать объект User на основе user_login
         user, created = User.objects.get_or_create(login=user_login)
         companion_login = validated_data['companion']['login']
         companion, created = User.objects.get_or_create(login=companion_login)
-        messages_data = validated_data.get('message_set', [])  # Получаем сообщения из данных
-        chat = Chat.objects.create(user=user,
-                                   companion=companion)
+
+        chat = Chat.objects.create(user=user, companion=companion)
+
+        messages_data = validated_data.pop('message_set', [])
+
         for message_data in messages_data:
-            # Создаем объект сообщения и связываем с чатом
-            Message.objects.create(chat=chat, **message_data)
+            sender_login = message_data.pop('sender')['login']
+            sender, created = User.objects.get_or_create(
+                login=sender_login)
+            message_data['sender'] = sender
+            message = Message.objects.create(chat=chat, **message_data)
+
         return chat
+
 
     class Meta:
         model = Chat

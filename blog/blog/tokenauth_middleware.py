@@ -1,8 +1,6 @@
-from urllib.parse import parse_qs
-
 from channels.db import database_sync_to_async
-from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
+from rest_framework_simplejwt.exceptions import InvalidToken
 from rest_framework_simplejwt.tokens import AccessToken, TokenError
 from channels.middleware import BaseMiddleware
 
@@ -19,18 +17,30 @@ def get_user(user_id):
 
 
 class TokenAuthMiddleware(BaseMiddleware):
+    def __call__(self, scope, receive, send):
+        token = self.get_token_from_scope(scope)
+        user =  self.get_user_from_token(token)
+        scope['user'] = user
+        return super().__call__(scope, receive, send)
 
-    def __init__(self, app):
-        self.app = app
+    def get_token_from_scope(self, scope):
+        headers = dict(scope["headers"])
+        authorization_header = headers.get(b'authorization')
+        if authorization_header:
+            auth_header = authorization_header.decode('utf-8')
+            parts = auth_header.split()
+            if len(parts) == 2 and parts[0].lower() == "bearer":
+                return parts[1]
+        return None
 
-    async def __call__(self, scope, receive, send):
-        parsed_query_string = parse_qs(scope["query_string"])
-        token = parsed_query_string.get(b"token")[0].decode("utf-8")
-
+    def get_user_from_token(self, token):
         try:
             access_token = AccessToken(token)
-            scope["user"] = await get_user(access_token["user_id"])
-        except TokenError:
-            scope["user"] = AnonymousUser()
-
-        return await self.app(scope, receive, send)
+            user_id = access_token.payload.get('user_id')
+            return user_id
+        except InvalidToken as e:
+            print("InvalidToken:", e)
+            return None
+        except TokenError as e:
+            print("TokenError:", e)
+            return None
