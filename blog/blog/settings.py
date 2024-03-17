@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 import os
+import sys
 from datetime import timedelta
 from pathlib import Path
 
@@ -142,17 +143,33 @@ CHANNEL_LAYERS = {
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
+TEST_MODE = 'test' in sys.argv
 
-DATABASES = {
-    'default': {
-        'ENGINE': os.environ['ENGINE'],
-        'NAME': os.environ['NAME'],
-        'USER': os.environ['USER'],
-        'PASSWORD': os.environ['PASSWORD'],
-        'HOST': os.environ['HOST'],
-        'PORT': os.environ['PORT']
+if TEST_MODE:
+    DATABASES = {
+        'default': {
+            'ENGINE': os.environ['ENGINE'],
+            'NAME': os.environ['TEST_NAME'],
+            'USER': os.environ['TEST_USER'],
+            'PASSWORD': os.environ['TEST_PASSWORD'],
+            'HOST': os.environ['TEST_HOST'],
+            'PORT': os.environ['TEST_PORT'],
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': os.environ['ENGINE'],
+            'NAME': os.environ['NAME'],
+            'USER': os.environ['USER'],
+            'PASSWORD': os.environ['PASSWORD'],
+            'HOST': os.environ['HOST'],
+            'PORT': os.environ['PORT'],
+            'TEST':{
+                'NAME': os.environ['TEST_NAME']
+            }
+        }
+    }
 
 AUTH_USER_MODEL = 'users.User'
 # Password validation

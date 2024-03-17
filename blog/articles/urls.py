@@ -18,7 +18,7 @@ urlpatterns = [
     path('rating/all', RatingViewSet.as_view({'get': 'list'})),
     path('genre/all', GenreViewSet.as_view({'get': 'list'})),
     path('tag/all', TagViewSet.as_view({'get': 'list'})),
-    path('article/add', ArticleViewSet.as_view({'post': 'create'})),
+    path('article/add', ArticleViewSet.as_view({'post': 'create'}), name='create_article'),
     path('comment/add', CommentViewSet.as_view({'post': 'create'})),
     path('rating/add', RatingViewSet.as_view({'post': 'create'})),
     path('genre/add', GenreViewSet.as_view({'post': 'create'})),
