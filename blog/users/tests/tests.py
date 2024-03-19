@@ -58,3 +58,31 @@ def test_get_registered_user(authorized_user):
     assert response.status_code == status.HTTP_200_OK
     assert response.data['email'] == user.email
     assert response.data['login'] == user.login
+
+@pytest.mark.django_db
+def test_get_all_registered_users(authorized_user):
+    second_user_data = {
+        'email': 'test@example.com',
+        'password': 'super_hard_password',
+        'login': 'second_user'
+    }
+    second_user = User.objects.create(
+        email=second_user_data['email'],
+        password=second_user_data['password'],
+        login=second_user_data['login']
+    )
+    assert second_user.email == second_user_data['email']
+    assert second_user.password == second_user_data['password']
+    assert second_user.login == second_user_data['login']
+
+    client = authorized_user['client']
+    user = authorized_user['user']
+
+    response = client.get('/user/all')
+
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.data) == 2
+
+    users_from_responses = [user_info['email'] for user_info in response.data]
+    assert user.email in users_from_responses
+    assert second_user.email in users_from_responses
