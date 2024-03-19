@@ -5,8 +5,10 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from users.models import User
 
 from rest_framework.test import APIClient
+
+
 @pytest.fixture
-def user_registration_data():
+def for_register_user():
     return {
         "email": "test@testmail.ru",
         "login": "TestUser",
@@ -14,28 +16,45 @@ def user_registration_data():
         "password2": "hardpassword"
     }
 
-@pytest.mark.django_db
-def test_register_user(user_registration_data):
+
+@pytest.fixture
+def authorized_user():
+    user_data = {
+        "email": "test@testmail.ru",
+        "login": "TestUser",
+        "password": "hardpassword",
+        "password2": "hardpassword"
+    }
     client = APIClient()
-    response = client.post('/auth/signup/', user_registration_data, format='json')
+    response = client.post('/auth/signup/', user_data, format='json')
+    assert response.status_code == status.HTTP_201_CREATED
+    user = User.objects.get(email='test@testmail.ru')
+    refresh = RefreshToken.for_user(user)
+    access_token = refresh.access_token
+    client.credentials(HTTP_AUTHORIZATION=f'Bearer {access_token}')
+    return {
+        'client': client,
+        'user': user
+    }
+
+
+
+@pytest.mark.django_db
+def test_register_user(for_register_user):
+    client = APIClient()
+    response = client.post('/auth/signup/', for_register_user, format='json')
     assert response.status_code == status.HTTP_201_CREATED
     assert User.objects.filter(email="test@testmail.ru").exists()
 
 
 @pytest.mark.django_db
-def test_get_user(user_registration_data):
-    client = APIClient()
-    response = client.post('/auth/signup', user_registration_data)
+def test_get_registered_user(authorized_user):
+    client = authorized_user['client']
+    user = authorized_user['user']
 
-    assert response.status_code == status.HTTP_201_CREATED
+    # Отправка запроса на получение данных пользователя
+    response = client.get(f'/user/{user.id}')
 
-    user = User.objects.get(email=user_registration_data['email'])
-    refresh = RefreshToken.for_user(user)
-    token = str(refresh.access_token)
-    client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
-
-    retrieve_response = client.get(f'/user/{user.id}')
-
-    assert retrieve_response.status_code == status.HTTP_200_OK
-    assert retrieve_response.data['email'] == user_registration_data['email']
-    assert retrieve_response.data['login'] == user_registration_data['login']
+    assert response.status_code == status.HTTP_200_OK
+    assert response.data['email'] == user.email
+    assert response.data['login'] == user.login
