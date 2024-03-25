@@ -31,7 +31,7 @@ class ArticleViewSet(viewsets.ModelViewSet):
 
             return Response({
                 'article': ArticleSerializer(article).data
-            })
+            }, status=status.HTTP_201_CREATED)
 
 
 class CommentViewSet(viewsets.ModelViewSet):

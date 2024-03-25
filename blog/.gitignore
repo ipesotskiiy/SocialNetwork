@@ -10,3 +10,4 @@ logger/__pycache__/
 users/__pycache__/
 users/migrations/
 users/tests/__pycache__/
+articles/tests/__pycache__/

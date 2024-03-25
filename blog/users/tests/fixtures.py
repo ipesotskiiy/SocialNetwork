@@ -7,16 +7,6 @@ from users.models import User
 
 
 @pytest.fixture
-def for_register_user():
-    return {
-        "email": "test@testmail.ru",
-        "login": "TestUser",
-        "password": "hardpassword",
-        "password2": "hardpassword"
-    }
-
-
-@pytest.fixture
 def authorized_user():
     user_data = {
         "email": "test@testmail.ru",

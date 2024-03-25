@@ -67,17 +67,6 @@ class ArticleSerializer(serializers.ModelSerializer):
     genres = GenreSerializer(many=True)
     tags = TagSerializer(many=True)
 
-    # genres = serializers.SlugRelatedField(
-    #     many=True,
-    #     queryset=Genre.objects.all(),
-    #     slug_field='name'
-    # )
-    # tags = serializers.SlugRelatedField(
-    #     many=True,
-    #     queryset=Tag.objects.all(),
-    #     slug_field='name'
-    # )
-
     class Meta:
         depth = 1
         model = Article
@@ -117,6 +106,7 @@ class ArticleSerializer(serializers.ModelSerializer):
             article.tags.add(tag)
 
         return article
+
 
 class CommentSerializer(serializers.ModelSerializer):
     """
