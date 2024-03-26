@@ -45,7 +45,7 @@ class CommentViewSet(viewsets.ModelViewSet):
             comment = serializer.save(user_id=self.request.user, article_id=article)
             return Response({
                 'comment': CommentSerializer(comment).data
-            })
+            }, status=status.HTTP_201_CREATED)
 
 
 class RatingViewSet(viewsets.ModelViewSet):
