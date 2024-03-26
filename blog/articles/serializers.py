@@ -10,16 +10,15 @@ class RatingSerializer(serializers.ModelSerializer):
     Сериализатор рейтинга
     """
     user_id = serializers.ReadOnlyField(source='user.id')
+    article_id = serializers.ReadOnlyField(source='article.id')
     rating = serializers.IntegerField()
 
     def validate(self, attrs):
         """
-        Валидация которая нужна для того, что бы рейтинг был не выше 5 и не ниже 0
+        Валидация которая нужна для того, что бы рейтинг был не выше 5
         """
         if attrs['rating'] > 5:
             attrs['rating'] = 5
-        elif attrs['rating'] < 0:
-            attrs['rating'] = 0
         return attrs
 
     class Meta:

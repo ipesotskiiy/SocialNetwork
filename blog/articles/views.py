@@ -59,7 +59,7 @@ class RatingViewSet(viewsets.ModelViewSet):
             rating = serializer.save(user_id=self.request.user, article_id=article)
             return Response({
                 'rating': RatingSerializer(rating).data
-            })
+            }, status=status.HTTP_201_CREATED)
 
 
 class GenreViewSet(viewsets.ModelViewSet):
