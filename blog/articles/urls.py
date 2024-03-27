@@ -31,7 +31,7 @@ urlpatterns = [
     path('article/update/<pk>', ArticleViewSet.as_view({'patch': 'partial_update'})),
     path('comment/update/<pk>', CommentViewSet.as_view({'patch': 'partial_update'})),
     path('rating/update/<pk>', RatingViewSet.as_view({'patch': 'partial_update'})),
-    path('genre/update/pk', GenreViewSet.as_view({'patch': 'partial_update'})),
+    path('genre/update/<pk>', GenreViewSet.as_view({'patch': 'partial_update'})),
     path('tag/update/<pk>', TagViewSet.as_view({'patch': 'partial_update'})),
     path('article/delete/<pk>', ArticleViewSet.as_view({'delete': 'destroy'})),
     path('comment/delete/<pk>', CommentViewSet.as_view({'delete': 'destroy'})),

@@ -1,7 +1,7 @@
 import pytest
 from rest_framework import status
 
-from articles.models import Article, Comment, Rating
+from articles.models import Article, Comment, Rating, Genre
 from users.tests.fixtures import authorized_user
 
 
@@ -39,3 +39,14 @@ def created_rating(authorized_user, created_article):
     assert response.status_code == status.HTTP_201_CREATED
     rating = Rating.objects.get(pk=response.data['rating']['id'])
     return rating
+
+
+@pytest.fixture
+def created_genre(authorized_user):
+    client = authorized_user['client']
+    genre_name = {"name": "Хоррор"}
+    response = client.post('/genre/add', genre_name, format='json')
+    assert response.status_code == status.HTTP_201_CREATED
+    genre = Genre.objects.get(pk=response.data['id'])
+    return genre
+
