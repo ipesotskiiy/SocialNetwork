@@ -11,7 +11,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     username = None
     login = models.CharField(verbose_name='User login', unique=True, max_length=30)
     bio = models.TextField(verbose_name='Information about user', max_length=2000, null=True, blank=True)
-    count_article = models.PositiveIntegerField(verbose_name='Count articles', null=True, blank=True)
+    count_article = models.PositiveIntegerField(verbose_name='Count articles', default=0, null=True, blank=True)
     avatar = models.FileField(
         upload_to='',
         verbose_name='User avatar',

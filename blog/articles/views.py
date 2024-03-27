@@ -1,6 +1,7 @@
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
-from rest_framework import generics, viewsets, status
+from rest_framework import viewsets, status
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django_filters.rest_framework import DjangoFilterBackend
@@ -24,6 +25,14 @@ class ArticleViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ArticleFilter
 
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            self.permission_classes = [AllowAny, ]
+        else:
+            self.permission_classes = [IsAuthenticated, ]
+
+        return super(ArticleViewSet, self).get_permissions()
+
     def create(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid(raise_exception=True):
@@ -31,7 +40,7 @@ class ArticleViewSet(viewsets.ModelViewSet):
 
             return Response({
                 'article': ArticleSerializer(article).data
-            })
+            }, status=status.HTTP_201_CREATED)
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -45,7 +54,7 @@ class CommentViewSet(viewsets.ModelViewSet):
             comment = serializer.save(user_id=self.request.user, article_id=article)
             return Response({
                 'comment': CommentSerializer(comment).data
-            })
+            }, status=status.HTTP_201_CREATED)
 
 
 class RatingViewSet(viewsets.ModelViewSet):
@@ -59,7 +68,7 @@ class RatingViewSet(viewsets.ModelViewSet):
             rating = serializer.save(user_id=self.request.user, article_id=article)
             return Response({
                 'rating': RatingSerializer(rating).data
-            })
+            }, status=status.HTTP_201_CREATED)
 
 
 class GenreViewSet(viewsets.ModelViewSet):
@@ -118,24 +127,3 @@ class DislikeListCreate(APIView):
         new_like.user_id.set([request.user])
         serializer = DislikeSerializer(new_like)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-# class OneGenreView(generics.RetrieveAPIView):
-#     serializer_class = GenreSerializer
-#
-#     def get(self, request, id):
-#         genre = Genre.objects.get(pk=self.kwargs['id'])
-#         genre_serializer = GenreSerializer(genre)
-#         return Response({
-#             'genre': genre_serializer.data
-#         })
-#
-#
-# class AllGenresView(generics.ListAPIView):
-#     serializer_class = GenreSerializer
-#
-#     def get(self, request):
-#         genres = Genre.objects.all()
-#         genres_serializer = GenreSerializer(genres, many=True)
-#         return Response({
-#             'genres': genres_serializer.data
-#         })
