@@ -57,3 +57,10 @@ def test_not_update_genre(authorized_user, created_genre):
     new_genre_name = {"name": "Not valid name"}
     response = client.patch(f'/genre/update/{created_genre.id}', new_genre_name, format='json')
     assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+@pytest.mark.django_db
+def test_delete_genre(authorized_user, created_genre):
+    client = authorized_user['client']
+    response = client.delete(f'/genre/delete/{created_genre.id}')
+    assert response.status_code == status.HTTP_204_NO_CONTENT

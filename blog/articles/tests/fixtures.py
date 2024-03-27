@@ -1,7 +1,13 @@
 import pytest
 from rest_framework import status
 
-from articles.models import Article, Comment, Rating, Genre
+from articles.models import (
+    Article,
+    Comment,
+    Rating,
+    Genre,
+    Tag
+)
 from users.tests.fixtures import authorized_user
 
 
@@ -50,3 +56,13 @@ def created_genre(authorized_user):
     genre = Genre.objects.get(pk=response.data['id'])
     return genre
 
+
+@pytest.fixture
+def created_tag(authorized_user):
+    client = authorized_user['client']
+    for_tag = {"name": "Test tag name"}
+    response = client.post('/tag/add', for_tag, format='json')
+    assert response.status_code == status.HTTP_201_CREATED
+    assert response.data['name'] == for_tag['name']
+    tag = Tag.objects.get(pk=response.data['id'])
+    return tag
