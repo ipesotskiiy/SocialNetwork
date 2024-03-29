@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from rest_framework import serializers
+from django.db import transaction
 
 from articles.models import Article, Genre, Comment, Rating, Like, Dislike, Tag
 
@@ -94,18 +95,21 @@ class ArticleSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         genre_names = validated_data.pop('genres', [])
         tag_names = validated_data.pop('tags', [])
-        print(f"Genres received: {genre_names}")
-        print(f"Tags received: {tag_names}")
+        user = validated_data.get('user_id')
 
-        article = Article.objects.create(**validated_data)
+        with transaction.atomic():
+            article = Article.objects.create(**validated_data)
 
-        for genre_name in genre_names:
-            genre, _ = Genre.objects.get_or_create(name=genre_name)
-            article.genres.add(genre)
+            for genre_name in genre_names:
+                genre, _ = Genre.objects.get_or_create(name=genre_name)
+                article.genres.add(genre)
 
-        for tag_name in tag_names:
-            tag, _ = Tag.objects.get_or_create(name=tag_name)
-            article.tags.add(tag)
+            for tag_name in tag_names:
+                tag, _ = Tag.objects.get_or_create(name=tag_name)
+                article.tags.add(tag)
+
+            user.count_article += 1
+            user.save()
 
         return article
 

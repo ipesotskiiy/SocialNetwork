@@ -42,6 +42,14 @@ class ArticleViewSet(viewsets.ModelViewSet):
                 'article': ArticleSerializer(article).data
             }, status=status.HTTP_201_CREATED)
 
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        user = instance.user_id
+        user.count_article -= 1
+        user.save()
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
