@@ -90,48 +90,55 @@ class TagViewSet(viewsets.ModelViewSet):
 
 
 class LikeListCreate(APIView):
-
     def get(self, request, pk):
-        comment = Comment.objects.filter(pk=pk)
-        like_count = comment.comment_id.count()
-        serializer = LikeSerializer(like_count, many=True)
-        return Response(serializer.data)
+        comment = get_object_or_404(Comment, pk=pk)
+        like_count = Like.objects.filter(comment_id=comment).count()
+        return Response({"like count": like_count})
 
     def post(self, request, pk):
-        user_id = self.request.user
-        comment_id = Comment.objects.filter(pk=pk)
-        check = Like.objects.filter(Q(user_id=user_id) & Q(comment_id=comment_id.last()))
-        if (check.exists()):
+        user_id = request.user
+        comment = get_object_or_404(Comment, pk=pk)
+
+        existing_dislike = Dislike.objects.filter(user_id=user_id, comment_id=comment)
+        if existing_dislike.exists():
+            existing_dislike.delete()
+
+        existing_like = Like.objects.filter(user_id=user_id, comment_id=comment)
+        if existing_like.exists():
             return Response({
                 "status": status.HTTP_400_BAD_REQUEST,
                 "message": "Already Liked"
             })
-        new_like = Like.objects.create(comment_id=comment_id.last())
-        new_like.save()
-        new_like.user_id.set([request.user])
-        serializer = LikeSerializer(new_like)
+
+        like = Like.objects.create(comment_id=comment)
+        like.user_id.add(user_id)
+        serializer = LikeSerializer(like)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class DislikeListCreate(APIView):
 
     def get(self, request, pk):
-        comment = Comment.objects.filter(pk=pk)
-        dislike_count = comment.comment_id.count()
-        serializer = DislikeSerializer(dislike_count, many=True)
-        return Response(serializer.data)
+        comment = get_object_or_404(Comment, pk=pk)
+        dislike_count = Dislike.objects.filter(comment_id=comment).count()
+        return Response({"dislike count": dislike_count})
 
     def post(self, request, pk):
-        user_id = self.request.user
-        comment_id = Comment.objects.filter(pk=pk)
-        check = Dislike.objects.filter(Q(user_id=user_id) & Q(comment_id=comment_id.last()))
-        if (check.exists()):
+        user_id = request.user
+        comment = get_object_or_404(Comment, pk=pk)
+
+        existing_like = Like.objects.filter(user_id=user_id, comment_id=comment)
+        if existing_like.exists():
+            existing_like.delete()
+
+        existing_dislike = Dislike.objects.filter(user_id=user_id, comment_id=comment)
+        if existing_dislike.exists():
             return Response({
                 "status": status.HTTP_400_BAD_REQUEST,
                 "message": "Already Disliked"
             })
-        new_like = Dislike.objects.create(comment_id=comment_id.last())
-        new_like.save()
-        new_like.user_id.set([request.user])
-        serializer = DislikeSerializer(new_like)
+
+        dislike = Dislike.objects.create(comment_id=comment)
+        dislike.user_id.add(user_id)
+        serializer = DislikeSerializer(dislike)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
