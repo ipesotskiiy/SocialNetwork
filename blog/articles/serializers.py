@@ -86,6 +86,9 @@ class ArticleSerializer(serializers.ModelSerializer):
 
         if average_rate > 5:
             average_rate = 5
+
+        obj.average_rate = round(average_rate, 1)
+        obj.save()
         return round(average_rate, 1)
 
     def create(self, validated_data):
