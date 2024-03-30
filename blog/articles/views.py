@@ -106,9 +106,8 @@ class LikeListCreate(APIView):
         existing_like = Like.objects.filter(user_id=user_id, comment_id=comment)
         if existing_like.exists():
             return Response({
-                "status": status.HTTP_400_BAD_REQUEST,
                 "message": "Already Liked"
-            })
+            }, status=status.HTTP_400_BAD_REQUEST, )
 
         like = Like.objects.create(comment_id=comment)
         like.user_id.add(user_id)
@@ -134,9 +133,8 @@ class DislikeListCreate(APIView):
         existing_dislike = Dislike.objects.filter(user_id=user_id, comment_id=comment)
         if existing_dislike.exists():
             return Response({
-                "status": status.HTTP_400_BAD_REQUEST,
                 "message": "Already Disliked"
-            })
+            }, status=status.HTTP_400_BAD_REQUEST)
 
         dislike = Dislike.objects.create(comment_id=comment)
         dislike.user_id.add(user_id)

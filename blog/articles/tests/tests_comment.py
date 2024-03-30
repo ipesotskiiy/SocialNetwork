@@ -1,6 +1,9 @@
 import pytest
+
 from rest_framework import status
-from users.tests.fixtures import authorized_user
+from rest_framework.test import APIClient
+
+from users.tests.fixtures import authorized_user, second_user
 from articles.tests.fixtures import created_article, created_comment
 
 
@@ -48,3 +51,32 @@ def test_delete_comment(authorized_user, created_comment):
     client = authorized_user['client']
     response = client.delete(f'/comment/delete/{created_comment.id}')
     assert response.status_code == status.HTTP_204_NO_CONTENT
+
+
+@pytest.mark.django_db
+def test_create_like_dislike(authorized_user, created_comment):
+    client = authorized_user['client']
+
+    like_response = client.post(f'/comment/like/{created_comment.id}')
+    assert like_response.status_code == status.HTTP_201_CREATED
+
+    duplicate_like_response = client.post(f'/comment/like/{created_comment.id}')
+    assert duplicate_like_response.status_code == status.HTTP_400_BAD_REQUEST
+
+    dislike_response = client.post(f'/comment/dislike/{created_comment.id}')
+    assert dislike_response.status_code == status.HTTP_201_CREATED
+
+    duplicate_dislike_response = client.post(f'/comment/dislike/{created_comment.id}')
+    assert duplicate_dislike_response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+@pytest.mark.django_db
+def test_get_like_count(authorized_user, created_comment):
+    client = authorized_user['client']
+
+    like_response = client.post(f'/comment/like/{created_comment.id}')
+    assert like_response.status_code == status.HTTP_201_CREATED
+
+    like_count_response = client.get(f'/comment/like/{created_comment.id}')
+    assert like_count_response.status_code == status.HTTP_200_OK
+    assert like_count_response.data['like count'] == 1
