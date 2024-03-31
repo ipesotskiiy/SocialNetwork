@@ -6,6 +6,7 @@ from users.serializers import UserSerializer, CompanionSerializer
 
 
 class MessageSerializer(serializers.ModelSerializer):
+    attachment = serializers.FileField(source='message.attachment', required=True, allow_null=True)
     class Meta:
         model = Message
         exclude = ('chat',)
@@ -21,15 +22,18 @@ class ChatListSerializer(serializers.ModelSerializer):
         fields = ('user', 'companion', 'last_message')
 
     def get_last_message(self, instance):
-        message = instance.message_set.first()
-        if message:
-            return {
-                'id': message.id,
-                'text': message.text,
-                'sender': message.sender.id,
-                'timestamp': message.date_and_time,
-                'attachment': message.attachment
+        last_message = instance.message_set.last()
+        if last_message:
+            message_data = {
+                'id': last_message.id,
+                'text': last_message.text,
+                'sender': last_message.sender.id,
+                'timestamp': last_message.date_and_time,
+                'attachment': None
             }
+            if last_message.attachment:
+                message_data['attachment'] = last_message.attachment.url
+            return message_data
         else:
             return None
 
@@ -57,7 +61,6 @@ class ChatSerializer(serializers.ModelSerializer):
             message = Message.objects.create(chat=chat, **message_data)
 
         return chat
-
 
     class Meta:
         model = Chat

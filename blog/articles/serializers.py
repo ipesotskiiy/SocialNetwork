@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from rest_framework import serializers
+from django.db import transaction
 
 from articles.models import Article, Genre, Comment, Rating, Like, Dislike, Tag
 
@@ -10,16 +11,15 @@ class RatingSerializer(serializers.ModelSerializer):
     Сериализатор рейтинга
     """
     user_id = serializers.ReadOnlyField(source='user.id')
+    article_id = serializers.ReadOnlyField(source='article.id')
     rating = serializers.IntegerField()
 
     def validate(self, attrs):
         """
-        Валидация которая нужна для того, что бы рейтинг был не выше 5 и не ниже 0
+        Валидация которая нужна для того, что бы рейтинг был не выше 5
         """
         if attrs['rating'] > 5:
             attrs['rating'] = 5
-        elif attrs['rating'] < 0:
-            attrs['rating'] = 0
         return attrs
 
     class Meta:
@@ -67,17 +67,6 @@ class ArticleSerializer(serializers.ModelSerializer):
     genres = GenreSerializer(many=True)
     tags = TagSerializer(many=True)
 
-    # genres = serializers.SlugRelatedField(
-    #     many=True,
-    #     queryset=Genre.objects.all(),
-    #     slug_field='name'
-    # )
-    # tags = serializers.SlugRelatedField(
-    #     many=True,
-    #     queryset=Tag.objects.all(),
-    #     slug_field='name'
-    # )
-
     class Meta:
         depth = 1
         model = Article
@@ -98,25 +87,32 @@ class ArticleSerializer(serializers.ModelSerializer):
 
         if average_rate > 5:
             average_rate = 5
+
+        obj.average_rate = round(average_rate, 1)
+        obj.save()
         return round(average_rate, 1)
 
     def create(self, validated_data):
         genre_names = validated_data.pop('genres', [])
         tag_names = validated_data.pop('tags', [])
-        print(f"Genres received: {genre_names}")
-        print(f"Tags received: {tag_names}")
+        user = validated_data.get('user_id')
 
-        article = Article.objects.create(**validated_data)
+        with transaction.atomic():
+            article = Article.objects.create(**validated_data)
 
-        for genre_name in genre_names:
-            genre, _ = Genre.objects.get_or_create(name=genre_name)
-            article.genres.add(genre)
+            for genre_name in genre_names:
+                genre, _ = Genre.objects.get_or_create(name=genre_name)
+                article.genres.add(genre)
 
-        for tag_name in tag_names:
-            tag, _ = Tag.objects.get_or_create(name=tag_name)
-            article.tags.add(tag)
+            for tag_name in tag_names:
+                tag, _ = Tag.objects.get_or_create(name=tag_name)
+                article.tags.add(tag)
+
+            user.count_article += 1
+            user.save()
 
         return article
+
 
 class CommentSerializer(serializers.ModelSerializer):
     """

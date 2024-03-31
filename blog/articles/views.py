@@ -1,6 +1,7 @@
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
-from rest_framework import generics, viewsets, status
+from rest_framework import viewsets, status
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django_filters.rest_framework import DjangoFilterBackend
@@ -24,6 +25,14 @@ class ArticleViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ArticleFilter
 
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            self.permission_classes = [AllowAny, ]
+        else:
+            self.permission_classes = [IsAuthenticated, ]
+
+        return super(ArticleViewSet, self).get_permissions()
+
     def create(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid(raise_exception=True):
@@ -31,7 +40,15 @@ class ArticleViewSet(viewsets.ModelViewSet):
 
             return Response({
                 'article': ArticleSerializer(article).data
-            })
+            }, status=status.HTTP_201_CREATED)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        user = instance.user_id
+        user.count_article -= 1
+        user.save()
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -45,7 +62,7 @@ class CommentViewSet(viewsets.ModelViewSet):
             comment = serializer.save(user_id=self.request.user, article_id=article)
             return Response({
                 'comment': CommentSerializer(comment).data
-            })
+            }, status=status.HTTP_201_CREATED)
 
 
 class RatingViewSet(viewsets.ModelViewSet):
@@ -59,7 +76,7 @@ class RatingViewSet(viewsets.ModelViewSet):
             rating = serializer.save(user_id=self.request.user, article_id=article)
             return Response({
                 'rating': RatingSerializer(rating).data
-            })
+            }, status=status.HTTP_201_CREATED)
 
 
 class GenreViewSet(viewsets.ModelViewSet):
@@ -73,69 +90,53 @@ class TagViewSet(viewsets.ModelViewSet):
 
 
 class LikeListCreate(APIView):
-
     def get(self, request, pk):
-        comment = Comment.objects.filter(pk=pk)
-        like_count = comment.comment_id.count()
-        serializer = LikeSerializer(like_count, many=True)
-        return Response(serializer.data)
+        comment = get_object_or_404(Comment, pk=pk)
+        like_count = Like.objects.filter(comment_id=comment).count()
+        return Response({"like count": like_count})
 
     def post(self, request, pk):
-        user_id = self.request.user
-        comment_id = Comment.objects.filter(pk=pk)
-        check = Like.objects.filter(Q(user_id=user_id) & Q(comment_id=comment_id.last()))
-        if (check.exists()):
+        user_id = request.user
+        comment = get_object_or_404(Comment, pk=pk)
+
+        existing_dislike = Dislike.objects.filter(user_id=user_id, comment_id=comment)
+        if existing_dislike.exists():
+            existing_dislike.delete()
+
+        existing_like = Like.objects.filter(user_id=user_id, comment_id=comment)
+        if existing_like.exists():
             return Response({
-                "status": status.HTTP_400_BAD_REQUEST,
                 "message": "Already Liked"
-            })
-        new_like = Like.objects.create(comment_id=comment_id.last())
-        new_like.save()
-        new_like.user_id.set([request.user])
-        serializer = LikeSerializer(new_like)
+            }, status=status.HTTP_400_BAD_REQUEST, )
+
+        like = Like.objects.create(comment_id=comment)
+        like.user_id.add(user_id)
+        serializer = LikeSerializer(like)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class DislikeListCreate(APIView):
 
     def get(self, request, pk):
-        comment = Comment.objects.filter(pk=pk)
-        dislike_count = comment.comment_id.count()
-        serializer = DislikeSerializer(dislike_count, many=True)
-        return Response(serializer.data)
+        comment = get_object_or_404(Comment, pk=pk)
+        dislike_count = Dislike.objects.filter(comment_id=comment).count()
+        return Response({"dislike count": dislike_count})
 
     def post(self, request, pk):
-        user_id = self.request.user
-        comment_id = Comment.objects.filter(pk=pk)
-        check = Dislike.objects.filter(Q(user_id=user_id) & Q(comment_id=comment_id.last()))
-        if (check.exists()):
-            return Response({
-                "status": status.HTTP_400_BAD_REQUEST,
-                "message": "Already Disliked"
-            })
-        new_like = Dislike.objects.create(comment_id=comment_id.last())
-        new_like.save()
-        new_like.user_id.set([request.user])
-        serializer = DislikeSerializer(new_like)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        user_id = request.user
+        comment = get_object_or_404(Comment, pk=pk)
 
-# class OneGenreView(generics.RetrieveAPIView):
-#     serializer_class = GenreSerializer
-#
-#     def get(self, request, id):
-#         genre = Genre.objects.get(pk=self.kwargs['id'])
-#         genre_serializer = GenreSerializer(genre)
-#         return Response({
-#             'genre': genre_serializer.data
-#         })
-#
-#
-# class AllGenresView(generics.ListAPIView):
-#     serializer_class = GenreSerializer
-#
-#     def get(self, request):
-#         genres = Genre.objects.all()
-#         genres_serializer = GenreSerializer(genres, many=True)
-#         return Response({
-#             'genres': genres_serializer.data
-#         })
+        existing_like = Like.objects.filter(user_id=user_id, comment_id=comment)
+        if existing_like.exists():
+            existing_like.delete()
+
+        existing_dislike = Dislike.objects.filter(user_id=user_id, comment_id=comment)
+        if existing_dislike.exists():
+            return Response({
+                "message": "Already Disliked"
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        dislike = Dislike.objects.create(comment_id=comment)
+        dislike.user_id.add(user_id)
+        serializer = DislikeSerializer(dislike)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)

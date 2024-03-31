@@ -1,10 +1,7 @@
-from django.db import IntegrityError
-
-from rest_framework import generics, viewsets, response
-from rest_framework.exceptions import ValidationError
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework import generics, viewsets, response, status
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny
 from rest_framework.response import Response
-from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from users.models import User, Follower
@@ -23,30 +20,21 @@ class UserViewSet(viewsets.ModelViewSet):
 
 class RegisterUserAPIView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
+    permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
-        try:
-            serializer = self.get_serializer(data=request.data)
-            if serializer.is_valid(raise_exception=True):
-                user = serializer.save()
-                token = AccessToken.for_user(user)
-                refreshToken = RefreshToken.for_user(user)
-                resp = Response({"user": RegisterSerializer(user, context=self.get_serializer_context()).data,
-                                 "token": str(token), "refreshToken": str(refreshToken)
-                                 })
-                return resp
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
 
-            else:
-                return Response({"message": 'not valid'})
+        refresh = RefreshToken.for_user(user)
+        access_token = refresh.access_token
 
-        except IntegrityError as e:
-            account = User.objects.get(username='')
-            account.delete()
-            raise ValidationError({"400": f'{str(e)}'})
-
-        except KeyError as e:
-            print(e)
-            raise ValidationError({"400": f'Field {str(e)} missing'})
+        return Response({
+            'user': serializer.data,
+            'refresh_token': str(refresh),
+            'access_token': str(access_token)
+        }, status=status.HTTP_201_CREATED)
 
 
 class MyTokenObtainPairView(TokenObtainPairView):

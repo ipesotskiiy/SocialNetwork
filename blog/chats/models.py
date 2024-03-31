@@ -13,7 +13,7 @@ class Chat(models.Model):
 class Message(models.Model):
     sender = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     text = models.CharField(max_length=500, blank=True)
-    attachment = models.FileField(blank=True)
+    attachment = models.FileField(blank=True, null=True)
     chat = models.ForeignKey(Chat, on_delete=models.CASCADE)
     date_and_time = models.DateTimeField(auto_now=True)
 
