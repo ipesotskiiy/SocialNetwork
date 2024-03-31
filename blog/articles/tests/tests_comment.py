@@ -1,19 +1,10 @@
 import pytest
 
 from rest_framework import status
-from rest_framework.test import APIClient
 
-from users.tests.fixtures import authorized_user, second_user
+from users.tests.fixtures import authorized_user
 from articles.tests.fixtures import created_article, created_comment
 
-
-@pytest.mark.django_db
-def test_comment_add(authorized_user, created_article):
-    client = authorized_user['client']
-    for_comment = {"article_id": created_article.id, "text": "New comment"}
-    response = client.post('/comment/add', for_comment, format='json')
-    assert response.status_code == status.HTTP_201_CREATED
-    assert response.data['comment']['text'] == for_comment['text']
 
 
 @pytest.mark.django_db

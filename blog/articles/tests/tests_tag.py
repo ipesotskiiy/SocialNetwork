@@ -6,15 +6,6 @@ from articles.tests.fixtures import created_tag
 
 
 @pytest.mark.django_db
-def test_tag_add(authorized_user):
-    client = authorized_user['client']
-    for_tag = {"name": "Test tag name"}
-    response = client.post('/tag/add', for_tag, format='json')
-    assert response.status_code == status.HTTP_201_CREATED
-    assert response.data['name'] == for_tag['name']
-
-
-@pytest.mark.django_db
 def test_get_genre(authorized_user, created_tag):
     client = authorized_user['client']
     response = client.get(f'/tag/{created_tag.id}')

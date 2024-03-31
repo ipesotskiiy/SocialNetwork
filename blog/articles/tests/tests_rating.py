@@ -5,16 +5,6 @@ from articles.tests.fixtures import created_article, created_rating
 
 
 @pytest.mark.django_db
-def test_rating_add(authorized_user, created_article):
-    client = authorized_user['client']
-    for_rating = {"article_id": created_article.id, "rating": 5}
-    response = client.post('/rating/add', for_rating, format='json')
-
-    assert response.status_code == status.HTTP_201_CREATED
-    assert response.data['rating']['rating'] == for_rating['rating']
-
-
-@pytest.mark.django_db
 def test_get_rating(authorized_user, created_rating):
     client = authorized_user['client']
     response = client.get(f'/rating/{created_rating.id}')

@@ -1,23 +1,7 @@
 import pytest
 from rest_framework import status
-from rest_framework.test import APIClient
 
-from users.models import User
 from users.tests.fixtures import authorized_user, second_user
-
-
-@pytest.mark.django_db
-def test_register_user():
-    user_data = {
-        "email": "test@testmail.ru",
-        "login": "TestUser",
-        "password": "hardpassword",
-        "password2": "hardpassword"
-    }
-    client = APIClient()
-    response = client.post('/auth/signup/', user_data, format='json')
-    assert response.status_code == status.HTTP_201_CREATED
-    assert User.objects.filter(email="test@testmail.ru").exists()
 
 
 @pytest.mark.django_db

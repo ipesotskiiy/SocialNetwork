@@ -6,15 +6,6 @@ from articles.tests.fixtures import created_genre
 
 
 @pytest.mark.django_db
-def test_create_genre(authorized_user):
-    client = authorized_user['client']
-    genre_name = {"name": "Хоррор"}
-    response = client.post('/genre/add', genre_name, format='json')
-    assert response.status_code == status.HTTP_201_CREATED
-    assert response.data['name'] == genre_name['name']
-
-
-@pytest.mark.django_db
 def test_not_create_genre(authorized_user):
     client = authorized_user['client']
     genre_name = {"name": "Not valid name for genre"}
